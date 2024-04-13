@@ -1,12 +1,9 @@
 package ru.anpilogoff_dev.listeners;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import ru.anpilogoff_dev.database.dao.UserDAO;
 import ru.anpilogoff_dev.database.dao.UserDAOImpl;
 import ru.anpilogoff_dev.service.SignUpService;
 import ru.anpilogoff_dev.service.SignUpServiceImpl;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -27,8 +24,8 @@ public class SCListener implements javax.servlet.ServletContextListener {
             throw new RuntimeException(e);
         }
 
-       final UserDAO userDao = new UserDAOImpl(dataSource); // Ваша имплементация DAO
-       final SignUpService userService = new SignUpServiceImpl(userDao); // Ваша имплементация сервиса
+       final UserDAO userDao = new UserDAOImpl(dataSource);
+       final SignUpService userService = new SignUpServiceImpl(userDao);
         sce.getServletContext().setAttribute("userDataService", userService);
     }
 

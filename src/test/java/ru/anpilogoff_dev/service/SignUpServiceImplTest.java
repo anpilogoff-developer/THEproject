@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.anpilogoff_dev.database.dao.UserDAO;
+import ru.anpilogoff_dev.database.model.ConfirmStatus;
 import ru.anpilogoff_dev.database.model.UserDataObject;
 import ru.anpilogoff_dev.database.model.UserModel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,10 +23,14 @@ class SignUpServiceImplTest {
     @InjectMocks
     SignUpServiceImpl service;
 
+    @Mock
+    UserDataObject object;
+
+
 
     @Test
     void registerUser() {
-        UserModel userModel = new UserModel("testUser", "testPass", "testEmail", "testNick");
+        UserModel userModel = new UserModel("test", "test", "test", "test");
         UserDataObject userDataObject = new UserDataObject(userModel);
         when(dao.create(any(UserDataObject.class))).thenReturn(userDataObject);
 
@@ -38,11 +43,16 @@ class SignUpServiceImplTest {
 
     @Test
     void getUser() {
-        UserModel model = new UserModel("test","test","test","test");
-        when(dao.get(model,null)).thenReturn(mock(UserDataObject.class));
+       UserModel model = new UserModel("test","test","test","test");
+        when(dao.get(model,null)).thenReturn(object);
+        when(object.getUserModel()).thenReturn(model);
+        when(object.getConfirmStatus()).thenReturn(ConfirmStatus.CONFIRMED);
 
-        UserDataObject object = service.getUser(model);
+        UserDataObject object = service.checkIsUserExist(model);
         verify(dao, times(1)).get(model,null);
+        verify(object,times(1)).getConfirmStatus();
+        verify(object,times(1)).getUserModel();
+        verify(object,times(1)).setConfirmStatus(any(ConfirmStatus.class));
         Assertions.assertNotNull(object);
     }
 }

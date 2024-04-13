@@ -6,9 +6,8 @@ import ru.anpilogoff_dev.database.model.UserModel;
 
 public interface SignUpService {
     UserDataObject registerUser(UserDataObject user);
-    void updateUser(UserModel user);
-    void deleteUser(long userId);
+    boolean confirmEmail(UserDataObject object);
 
-    UserDataObject getUser(UserModel user);
+    UserDataObject checkIsUserExist(UserModel user);
 
 }

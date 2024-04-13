@@ -1,6 +1,7 @@
 package ru.anpilogoff_dev.database.dao;
 
 import lombok.SneakyThrows;
+import org.apache.logging.log4j.core.util.Assert;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,7 +39,7 @@ class UserDAOImplTest {
     Connection connectionReal;
 
 
-    String url = "jdbc:mysql://localhost:3306/mysql"; // Замените на ваш URL
+    String url = "jdbc:mysql://localhost:3306/THEproject"; //это был не копипаст если что.)
     String username = "io";
     String password = "password";
 
@@ -53,7 +54,7 @@ class UserDAOImplTest {
     @AfterEach
     void clean(){
         connectionReal = DriverManager.getConnection(url,username,password);
-        PreparedStatement statement = connectionReal.prepareStatement("DELETE FROM THEproject_users");
+        PreparedStatement statement = connectionReal.prepareStatement("DELETE FROM users");
         statement.executeUpdate();
         connectionReal.close();
     }
@@ -61,14 +62,14 @@ class UserDAOImplTest {
 
 
     @Test
-    void createUserWhenNotExists() throws SQLException {
+    void tryCreateUserWhenNotExists() throws SQLException {
 
         connectionReal = DriverManager.getConnection(url, username, password);
         when(dataSource.getConnection()).thenReturn(connectionReal);
 
         UserModel model = new UserModel("test1","test1","test1","test1");
         UserDataObject testUserObject = new UserDataObject(model);
-        //Check is reg success
+        //Check is registration success
         UserDataObject result = dao.create(testUserObject);
 
         Assertions.assertEquals(ConfirmStatus.REG_SUCCESS,result.getConfirmStatus());
@@ -77,14 +78,14 @@ class UserDAOImplTest {
     }
 
     @Test
-    void createUserWhenExists() throws SQLException {
+    void tryCreateUserWhenExists() throws SQLException {
         when(dataSource.getConnection()).thenReturn(connectionMocked);
         when(connectionMocked.prepareStatement(anyString())).thenReturn(statementMocked);
         when(statementMocked.executeUpdate()).thenReturn(0);
 
         UserModel model = new UserModel("test1","test1","test1","test1");
         UserDataObject testUserObject = new UserDataObject(model);
-        //Check is reg not success
+        //Check is registration not success
         UserDataObject result = dao.create(testUserObject);
         Assertions.assertEquals(ConfirmStatus.REG_ERROR,result.getConfirmStatus());
         verify(connectionMocked,times(1)).rollback();
@@ -98,6 +99,7 @@ class UserDAOImplTest {
         when(dataSource.getConnection()).thenReturn(connectionReal);
         dao.get(new UserModel("test"),null);
         verify(dataSource,times(1)).getConnection();
+        Assertions.assertTrue(connectionReal.isClosed());
     }
 
     @SneakyThrows
