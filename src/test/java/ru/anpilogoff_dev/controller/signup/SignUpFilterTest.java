@@ -9,7 +9,6 @@ import ru.anpilogoff_dev.database.model.ConfirmStatus;
 import ru.anpilogoff_dev.database.model.UserDataObject;
 import ru.anpilogoff_dev.database.model.UserModel;
 import ru.anpilogoff_dev.service.SignUpService;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -27,26 +26,30 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SignUpFilterTest extends HttpFilter {
-    @InjectMocks SignUpFilter filter;
+    @InjectMocks
+    SignUpFilter filter;
 
-    @Mock HttpServletRequest request;
+    @Mock
+    HttpServletRequest request;
 
-    @Mock HttpServletResponse response;
+    @Mock
+    HttpServletResponse response;
 
-    @Mock FilterChain chain;
+    @Mock
+    FilterChain chain;
 
-    @Mock SignUpService service;
+    @Mock
+    SignUpService service;
 
-    @Mock ServletContext context;
-
-
+    @Mock
+    ServletContext context;
 
         @Test
         void testRedirect_withNonNullSessionAndAuthorization() throws ServletException, IOException {
             when(request.getServletContext()).thenReturn(context);
-//            when(request.getServletContext().getAttribute("userDataService")).thenReturn(service);
             when(request.getSession(false)).thenReturn(mock(HttpSession.class));
             when(request.getHeader("Authorization")).thenReturn("Basic auth_value");
+
 
             filter.doFilter(request, response,chain);
 
@@ -58,16 +61,16 @@ class SignUpFilterTest extends HttpFilter {
         when(request.getServletContext()).thenReturn(context);
         when(request.getServletContext().getAttribute("userDataService")).thenReturn(service);
         when(request.getSession(false)).thenReturn(null);
-      //  when(request.getHeader("Authorization")).thenReturn(null);
 
         UserDataObject object = mock(UserDataObject.class);
         Enumeration<String> parameterNames = Collections.enumeration(Arrays.asList("login","password","email","nickname"));
 
         when(request.getParameterNames()).thenReturn(parameterNames);
         when(request.getParameter(anyString())).thenReturn("anyString");
-        when(service.getUser(any(UserModel.class))).thenReturn(object);
+        when(service.checkIsUserExist(any(UserModel.class))).thenReturn(object);
         when(response.getWriter()).thenReturn(mock(PrintWriter.class));
-        when(object.getConfirmStatus()).thenReturn(ConfirmStatus.CONFIRMED);
+        when(object.getConfirmStatus()).thenReturn(ConfirmStatus.CONFIRMED_LOGIN);
+
 
         filter.doFilter(request,response,chain);
 
@@ -76,7 +79,7 @@ class SignUpFilterTest extends HttpFilter {
         verify(request, times(1)).getParameter("email");
         verify(request, times(1)).getParameter("nickname");
         verify(response.getWriter(), times(1))
-                .write("User with your creds. r already registered and confirmed");
+                .write("User with your login. r already registered...");
         verify(response.getWriter(),times(1)).flush();
     }
 
@@ -87,8 +90,7 @@ class SignUpFilterTest extends HttpFilter {
         when(request.getSession(false)).thenReturn(null);
 
         Enumeration<String> parameterNames = Collections.enumeration(Arrays.asList("login","password","email","nickname"));
-        UserModel model = new UserModel("1","2","3","4");
-        when(service.getUser(any(UserModel.class))).thenReturn(null);
+        when(service.checkIsUserExist(any(UserModel.class))).thenReturn(null);
 
         when(request.getParameterNames()).thenReturn(parameterNames);
         when(request.getParameter(anyString())).thenReturn("anyString");
