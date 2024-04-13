@@ -1,9 +1,12 @@
 package ru.anpilogoff_dev.database.model;
 
 public enum ConfirmStatus {
-    UNCONFIRMED,
-    CONFIRMED,
+    UNKNOWN,
     REG_SUCCESS,
     REG_ERROR,
-    UNKNOWN
+    UNCONFIRMED,
+    CONFIRMED,
+    CONFIRMED_LOGIN,
+    CONFIRMED_EMAIL,
+    CONFIRMED_NICKNAME
 }
