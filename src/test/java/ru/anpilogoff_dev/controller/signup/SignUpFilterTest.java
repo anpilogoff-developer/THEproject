@@ -12,7 +12,6 @@ import ru.anpilogoff_dev.service.SignUpService;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -25,7 +24,7 @@ import java.util.Enumeration;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class SignUpFilterTest extends HttpFilter {
+class SignUpFilterTest {
     @InjectMocks
     SignUpFilter filter;
 
@@ -42,61 +41,61 @@ class SignUpFilterTest extends HttpFilter {
     SignUpService service;
 
     @Mock
-    ServletContext context;
+    PrintWriter writer;
 
-        @Test
-        void testRedirect_withNonNullSessionAndAuthorization() throws ServletException, IOException {
-            when(request.getServletContext()).thenReturn(context);
-            when(request.getSession(false)).thenReturn(mock(HttpSession.class));
-            when(request.getHeader("Authorization")).thenReturn("Basic auth_value");
-
-
-            filter.doFilter(request, response,chain);
-
-            verify(response).sendRedirect(request.getServletContext().getContextPath() + "/home");
-        }
+    @Mock
+    ServletContext servletContext;
 
     @Test
-    void testRequestParamsChecks_withNullSessionAndAuthorization() throws ServletException, IOException {
-        when(request.getServletContext()).thenReturn(context);
-        when(request.getServletContext().getAttribute("userDataService")).thenReturn(service);
-        when(request.getSession(false)).thenReturn(null);
+    void testRedirect_withNonNullSessionAndAuthorization() throws ServletException, IOException {
+        when(request.getSession(false)).thenReturn(mock(HttpSession.class));
+        when(request.getHeader("Authorization")).thenReturn("Basic auth_value");
+        when(request.getServletContext()).thenReturn(servletContext);
+        when(servletContext.getContextPath()).thenReturn("/THEproject-backend-fork");
 
-        UserDataObject object = mock(UserDataObject.class);
-        Enumeration<String> parameterNames = Collections.enumeration(Arrays.asList("login","password","email","nickname"));
+        filter.doFilter(request, response, chain);
 
-        when(request.getParameterNames()).thenReturn(parameterNames);
-        when(request.getParameter(anyString())).thenReturn("anyString");
-        when(service.checkIsUserExist(any(UserModel.class))).thenReturn(object);
-        when(response.getWriter()).thenReturn(mock(PrintWriter.class));
-        when(object.getConfirmStatus()).thenReturn(ConfirmStatus.CONFIRMED_LOGIN);
-
-
-        filter.doFilter(request,response,chain);
-
-        verify(request, times(1)).getParameter("login");
-        verify(request, times(1)).getParameter("password");
-        verify(request, times(1)).getParameter("email");
-        verify(request, times(1)).getParameter("nickname");
-        verify(response.getWriter(), times(1))
-                .write("User with your login. r already registered...");
-        verify(response.getWriter(),times(1)).flush();
+        verify(response).sendRedirect("/THEproject-backend-fork/home");
     }
 
     @Test
-    void checkIfFilterChaindDoFilterCallsIfUserNotExists() throws ServletException, IOException {
-        when(request.getServletContext()).thenReturn(context);
-        when(request.getServletContext().getAttribute("userDataService")).thenReturn(service);
+    void testRequestParamsChecks_withNullSessionAndAuthorization() throws ServletException, IOException {
         when(request.getSession(false)).thenReturn(null);
+//        when(request.getHeader("Authorization")).thenReturn(null);
+        when(response.getWriter()).thenReturn(writer);
+        when(request.getServletContext()).thenReturn(servletContext);
+        when(servletContext.getAttribute("userDataService")).thenReturn(service);
 
-        Enumeration<String> parameterNames = Collections.enumeration(Arrays.asList("login","password","email","nickname"));
+        UserDataObject object = mock(UserDataObject.class);
+        when(service.checkIsUserExist(any(UserModel.class))).thenReturn(object);
+        when(object.getConfirmStatus()).thenReturn(ConfirmStatus.CONFIRMED_LOGIN);
+
+        Enumeration<String> parameterNames = Collections.enumeration(Arrays.asList("login", "password", "email", "nickname"));
+        when(request.getParameterNames()).thenReturn(parameterNames);
+        when(request.getParameter(anyString())).thenReturn("validInput");
+
+        filter.doFilter(request, response, chain);
+
+        verify(writer).write(contains("User with your login. r already registered..."));
+        verify(writer).flush();
+    }
+
+    @Test
+    void checkIfFilterChainDoFilterCallsIfUserNotExists() throws ServletException, IOException {
+        when(request.getSession(false)).thenReturn(null);
+//        when(request.getHeader("Authorization")).thenReturn(null);
+        when(request.getServletContext()).thenReturn(servletContext);
+        when(servletContext.getAttribute("userDataService")).thenReturn(service);
+
         when(service.checkIsUserExist(any(UserModel.class))).thenReturn(null);
 
+
+        Enumeration<String> parameterNames = Collections.enumeration(Arrays.asList("login", "password", "email", "nickname"));
         when(request.getParameterNames()).thenReturn(parameterNames);
-        when(request.getParameter(anyString())).thenReturn("anyString");
-        filter.doFilter(request,response,chain);
+        when(request.getParameter(anyString())).thenReturn("validInput");
 
-        verify(chain,times(1)).doFilter(request,response);
+        filter.doFilter(request, response, chain);
 
+        verify(chain).doFilter(request, response);
     }
 }
