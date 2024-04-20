@@ -15,7 +15,7 @@ on:
           MYSQL_ROOT_PASSWORD: password
           MYSQL_USER: io
           MYSQL_PASSWORD: password
-          MYSQL_DATABASE: testdb
+          MYSQL_DATABASE: THEproject
         ports:
           - 3306:3306
         options: >-
