@@ -8,6 +8,4 @@ import java.sql.Connection;
 public interface UserDAO {
     UserDataObject create(UserDataObject model);
     UserDataObject get(UserModel model, Connection connection);
-    // Другие необходимые методы...
-    //int exist(UserModel userModel);
 }

@@ -1,9 +1,14 @@
 package ru.anpilogoff_dev.listeners;
 
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.hibernate.validator.HibernateValidator;
 import ru.anpilogoff_dev.database.dao.UserDAO;
 import ru.anpilogoff_dev.database.dao.UserDAOImpl;
 import ru.anpilogoff_dev.service.SignUpService;
 import ru.anpilogoff_dev.service.SignUpServiceImpl;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -17,6 +22,7 @@ public class SCListener implements javax.servlet.ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         DataSource dataSource;
         Context initialContext;
+
         try {
             initialContext = new InitialContext();
             dataSource = (DataSource) initialContext.lookup("java:comp/env/jdbc/THEproject_datasource");
