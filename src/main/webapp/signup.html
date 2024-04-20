@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>SignUp</title>
+
+    <style>
+        input {
+          outline: none;
+            background: gray;
+            transition: 2s linear;
+        }
+        label {
+            display: inherit;
+        }
+
+        .form_el {
+            display: block;
+            padding: 5px;
+            margin: 3px;
+        }
+
+        #form {
+            position: absolute;
+            top: 40%;
+            left: 40%;
+            padding: 10px;
+            border: 2px solid black;
+            background: gray;
+        }
+    </style>
+</head>
+<body>
+<div id="form">
+    <div class="form_el"><label for="login" id="login_lbl">login: </label> <input id="login" type="text"></div>
+    <div class="form_el"><label for="password">passwd: </label> <input id="password" type="text"></div>
+    <div class="form_el"><label for="email" id="email_lbl">e-mail: </label> <input id="email" type="text"></div>
+    <div class="form_el"><label id="nickname_lbl" for="nickname">nick: </label> <input id="nickname" type="text"></div>
+</div>
+<div id="notification"></div>
+
+<script>
+    const notification = document.getElementById('notification');
+
+    function setValid(inp){
+        inp.style.borderColor = 'green';  // Зеленая рамка, если логин валиден
+        notification.innerText = ''; // Очистка сообщения об ошибке, если оно есть
+    }
+
+    function setInvalid(inp){  // invalidmaker :D
+        inp.style.borderColor = 'red';  // Красная рамка, если логин невалиден
+    }
+    function validateLogin(event) {
+        const input = event.target;
+        const regex = /^[a-zA-Z0-9_]{7,15}$/;  // Регулярочка для валидации ввода логина..
+
+        if (regex.test(input.value)) {
+            setValid(input)
+        } else {
+            setInvalid(input);
+            notification.innerText = 'Логин должен быть от 7 до 15 символов и содержать только буквы, цифры и нижние подчеркивания.';
+        }
+    }
+
+    function validatePassword(event) {
+        const input = event.target;
+        const regex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;   // .. для валидации ввода логина соответственно
+
+        if (regex.test(input.value)) {
+            setValid(input);
+        } else {
+            setInvalid(input);
+            notification.innerText = 'Пароль должен быть минимум 8 символов, содержать хотя бы одну заглавную букву и одну цифру.';
+        }
+    }
+
+    function validateEmail(event) {
+        const input = event.target;
+        // Регулярное выражение для проверки формата электронной почты
+        const regex = /^[a-zA-Z0-9]{1,10}@[a-zA-Z0-9]{1,5}\.[a-zA-Z0-9]{1,5}$/;
+
+        if (regex.test(input.value)) {
+            setValid(input);
+        } else {
+            setInvalid(input);
+            notification.innerText =
+                'Электронный адрес должен содержать' +
+                ' не более 10 буквенно-цифровых символов до @, не более 5' +
+                ' буквенно-цифровых символов после @ и до точки, и не более 5 буквенно-цифровых символов после точки.';
+        }
+    }
+
+
+    document.getElementById('login').addEventListener('keyup', validateLogin);
+    document.getElementById('password').addEventListener('keyup', validatePassword);
+    document.getElementById('email').addEventListener('keyup', validateEmail);
+
+
+
+</script>
+</body>
+</html>
