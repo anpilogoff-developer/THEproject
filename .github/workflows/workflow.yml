@@ -8,9 +8,11 @@ on:
   workflow_dispatch:
 
 
+jobs:
+  build-and-deploy:
     services:
       mysql:
-        image: mysql:8.0.3
+        image: mysql:8.3.0
         env:
           MYSQL_ROOT_PASSWORD: password
           MYSQL_USER: io
@@ -23,10 +25,8 @@ on:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-
-jobs:
-  build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
       - uses: actions/checkout@v1
 
