@@ -10,23 +10,9 @@ on:
 
 jobs:
   build-and-deploy:
-    services:
-      mysql:
-        image: mysql:8.3.0
-        env:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_USER: io
-          MYSQL_PASSWORD: password
-          MYSQL_DATABASE: THEproject
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost -u io --password=password"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v1
 
