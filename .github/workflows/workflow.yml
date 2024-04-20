@@ -1,6 +1,5 @@
 name: CI/CD Workflow
 
-
 on:
   push:
     branches: [ "test" ]
@@ -9,6 +8,21 @@ on:
   workflow_dispatch:
 
 
+    services:
+      mysql:
+        image: mysql:8.0.3
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_USER: io
+          MYSQL_PASSWORD: password
+          MYSQL_DATABASE: testdb
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u io --password=password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
 jobs:
   build-and-deploy:
