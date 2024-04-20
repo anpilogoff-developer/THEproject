@@ -28,6 +28,7 @@ public class UserDAOImpl implements UserDAO {
     @SneakyThrows
     @Override
     public synchronized UserDataObject create(UserDataObject object) {
+        dbLogger.debug("signupDAO: create()");
         UserModel model = object.getUserModel();
         Connection con;
         boolean anyErrors = false;
@@ -72,7 +73,7 @@ public class UserDAOImpl implements UserDAO {
                 if(anyErrors){
                     connection.rollback();
                     object.setConfirmStatus(ConfirmStatus.REG_ERROR);
-                    dbLogger.debug("Problem during new user data INSERT method: USER NOT REGISTERED");
+                    dbLogger.debug("    ---Problem during new user data INSERT method: USER NOT REGISTERED");
                 }
         } catch (SQLException e) {
             dbErrorLogger.warn("SQLException while INSERT QUERY execution:  " + e.getMessage() + "\n" + "  " + e);
@@ -84,14 +85,14 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public  UserDataObject get(UserModel model, Connection con) {
-        dbLogger.debug("UserDAOImpl: get()");
+        dbLogger.debug("signupDAO: get()");
         UserDataObject object = null;
         Connection currentConnection = con;
         if (currentConnection == null) {
-            dbLogger.debug("Try establishing connection...");
+            dbLogger.debug("  --Try establishing connection...");
             try  {
                 currentConnection = dataSource.getConnection();
-                dbLogger.debug("Connection established:   " + currentConnection);
+                dbLogger.debug("  --Connection established:   " + currentConnection);
             } catch (SQLException e) {
                 dbErrorLogger.warn("Error during connection establishment: "+ e.getMessage() + "\n" + e);
                 throw new RuntimeException(e);
@@ -102,7 +103,7 @@ public class UserDAOImpl implements UserDAO {
             getStatement.setString(1, model.getLogin());
 
             try (ResultSet resultSet = getStatement.executeQuery()) {
-                dbLogger.debug("DAO: User exists checking...");
+                dbLogger.debug("  --User exists checking...");
                 if (resultSet.next()) {
                     dbLogger.debug("  --User with login:  " + model.getLogin() + " exists;");
                     model.setPassword(resultSet.getString("password"));
@@ -113,19 +114,20 @@ public class UserDAOImpl implements UserDAO {
 
                     if (resultSet.getBoolean("confirmed")) {
                         object.setConfirmStatus(ConfirmStatus.CONFIRMED);
-                        dbLogger.debug("  --confirmation status: CONFIRMED" + "\n");
+                        dbLogger.debug("  --confirmation status: CONFIRMED");
                     } else {
                         object.setConfirmStatus(ConfirmStatus.UNCONFIRMED);
-                        dbLogger.debug("  --confirmation status: UNCONFIRMED" + "\n");
+                        dbLogger.debug("  --confirmation status: UNCONFIRMED");
                     }
+                    dbLogger.debug("\n");
                 } else dbLogger.debug("  --User with login:  " + model.getLogin() + " NOT exists;");
             }
             if(con == null) {
                 currentConnection.close();
-                dbLogger.debug(currentConnection.isClosed() + "    <--закрыто ли соедининие");
+                dbLogger.debug(  "  --закрыто ли соедининие:" + currentConnection.isClosed());
             }
         } catch (SQLException e) {
-            dbErrorLogger.warn("Error during query execution:  " + e);
+            dbErrorLogger.warn("    ---Error during query execution:  " + e);
             throw new RuntimeException(e);
         }
         return object;

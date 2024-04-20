@@ -1,5 +1,6 @@
 package ru.anpilogoff_dev.service;
 
+import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.anpilogoff_dev.database.dao.UserDAO;
@@ -41,5 +42,4 @@ public class SignUpServiceImpl implements SignUpService {
         }
         return checked;
     }
-
 }
