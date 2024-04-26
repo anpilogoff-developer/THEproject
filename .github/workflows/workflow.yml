@@ -47,4 +47,4 @@ jobs:
       - name: Deploy to VPS
         run: |
           scp target/THEproject.war ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:/opt/tomcat/webapps/
-          ssh ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} -p ${{ secrets.VPS_PORT }} "sudo systemctl restart tomcat"
+          ssh -vvv ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} -p ${{ secrets.VPS_PORT }} "sudo systemctl restart tomcat"
