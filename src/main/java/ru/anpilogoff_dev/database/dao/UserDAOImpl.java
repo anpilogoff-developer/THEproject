@@ -76,7 +76,7 @@ public class UserDAOImpl implements UserDAO {
                     dbLogger.debug("    ---Problem during new user data INSERT method: USER NOT REGISTERED");
                 }
         } catch (SQLException e) {
-            dbErrorLogger.warn("SQLException while INSERT QUERY execution:  " + e.getMessage() + "\n" + "  " + e);
+            dbLogger.debug("SQLException while INSERT QUERY execution:  " + e.getMessage() + "\n" + "  " + e);
             throw new RuntimeException(e);
         }
         dbLogger.debug("  --Connection is closed? : " + con + ":  " + con.isClosed()+ "\n");
