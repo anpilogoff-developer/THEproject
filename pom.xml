@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.anpilogoff_dev</groupId>
-    <artifactId>THEproject-backend-fork-</artifactId>
+    <artifactId>THEproject</artifactId>
     <version>1.0.0</version>
     <packaging>war</packaging>
 
