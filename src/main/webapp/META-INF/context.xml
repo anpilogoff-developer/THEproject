@@ -1,0 +1,15 @@
+<Context>
+
+    <!-- Default set of monitored resources. If one of these changes, the    -->
+    <!-- web application will be reloaded.                                   -->
+
+
+    <!-- Uncomment this to disable session persistence across Tomcat restarts -->
+    <!--
+    <Manager pathname="" />
+    -->  <Resource name="jdbc/THEproject_datasource" auth="Container" type="javax.sql.DataSource"
+                   factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+                   maxTotal="100" maxIdle="30" maxWaitMillis="10000"
+                   username="io" password="password" driverClassName="com.mysql.cj.jdbc.Driver"
+                   url="jdbc:mysql://localhost:3306/THEproject_db"/>
+</Context>
