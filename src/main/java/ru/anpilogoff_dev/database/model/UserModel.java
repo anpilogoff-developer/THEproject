@@ -1,8 +1,6 @@
 package ru.anpilogoff_dev.database.model;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 @Getter
@@ -13,19 +11,25 @@ import lombok.*;
 public class UserModel {
     private long id;
 
-    @Size(min = 4)
+    @Pattern(regexp = "^[a-zA-Z0-9_]{7,15}$",
+            message = "Invalid login value, must between 4 - 15")
     private String login;
 
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,}$",
+            message = "Invalid password value, must be at least 8 characters long," +
+                    "contain at least one capital letter and one number.")
     private String password;
     private String nickname;
+
+   @Pattern(regexp = "^[a-zA-Z0-9]{1,10}@[a-zA-Z0-9]{1,5}\\.[a-zA-Z0-9]{1,5}$",message = "Invalid email value")
     private String email;
 
     private String registrationDate;
-    public UserModel(String login, String password, String nickname, String email) {
+    public UserModel(String login, String password, String email,String nickname) {
         this.login = login;
         this.password = password;
-        this.nickname = nickname;
         this.email = email;
+        this.nickname = nickname;
 
     }
 

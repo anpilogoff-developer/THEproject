@@ -3,12 +3,13 @@
         "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
-
     <display-name>Archetype Created Web Application</display-name>
+
     <filter>
         <filter-name>signup</filter-name>
         <filter-class>ru.anpilogoff_dev.controller.signup.SignUpFilter</filter-class>
     </filter>
+
     <filter-mapping>
         <filter-name>signup</filter-name>
         <url-pattern>/signup</url-pattern>
@@ -19,21 +20,12 @@
         <servlet-class>ru.anpilogoff_dev.controller.signup.SignUpServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
-    <servlet>
-        <servlet-name>callback</servlet-name>
-        <servlet-class>ru.anpilogoff_dev.controller.signup.Callback</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
 
     <servlet-mapping>
         <servlet-name>signup</servlet-name>
         <url-pattern>/signup</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>callback</servlet-name>
-        <url-pattern>/callback</url-pattern>
-    </servlet-mapping>
+
 
 
 

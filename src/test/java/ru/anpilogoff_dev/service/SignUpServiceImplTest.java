@@ -46,13 +46,13 @@ class SignUpServiceImplTest {
        UserModel model = new UserModel("test","test","test","test");
         when(dao.get(model,null)).thenReturn(object);
         when(object.getUserModel()).thenReturn(model);
-        when(object.getConfirmStatus()).thenReturn(ConfirmStatus.CONFIRMED);
+        when(object.getRegistrationStatus()).thenReturn(ConfirmStatus.CONFIRMED);
 
         UserDataObject object = service.checkIsUserExist(model);
         verify(dao, times(1)).get(model,null);
-        verify(object,times(1)).getConfirmStatus();
+        verify(object,times(1)).getRegistrationStatus();
         verify(object,times(1)).getUserModel();
-        verify(object,times(1)).setConfirmStatus(any(ConfirmStatus.class));
+        verify(object,times(1)).setRegistrationStatus(any(ConfirmStatus.class));
         Assertions.assertNotNull(object);
     }
 }

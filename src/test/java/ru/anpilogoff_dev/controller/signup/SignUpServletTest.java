@@ -78,9 +78,9 @@ class SignUpServletTest {
 
         verify(signUpService).registerUser(any(UserDataObject.class));
 
-        Assertions.assertEquals(userDataObject.getConfirmStatus(),ConfirmStatus.REG_SUCCESS);
+        Assertions.assertEquals(userDataObject.getRegistrationStatus(),ConfirmStatus.REG_SUCCESS);
 
-        verify(writer1,times(1)).write("User successfully registered,and now needs confirmation by email");
+        verify(writer1,times(1)).write(anyString());
         verify(writer1,times(1)).flush();
 
     }

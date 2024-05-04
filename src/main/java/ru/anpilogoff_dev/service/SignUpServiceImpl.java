@@ -29,15 +29,15 @@ public class SignUpServiceImpl implements SignUpService {
         log.debug("SignupService: checkIsUserExist()");
         UserDataObject checked = userDAO.get(user,null);
 
-        if( checked != null && checked.getConfirmStatus().equals(ConfirmStatus.CONFIRMED)){
+        if( checked != null && checked.getRegistrationStatus().equals(ConfirmStatus.CONFIRMED)){
             UserModel userModel = checked.getUserModel();
 
             if(userModel.getLogin().equals(user.getLogin())){
-                checked.setConfirmStatus(ConfirmStatus.CONFIRMED_LOGIN);
+                checked.setRegistrationStatus(ConfirmStatus.CONFIRMED_LOGIN);
             }else if(userModel.getEmail().equals(user.getEmail())){
-                checked.setConfirmStatus(ConfirmStatus.CONFIRMED_EMAIL);
+                checked.setRegistrationStatus(ConfirmStatus.CONFIRMED_EMAIL);
             }else if(userModel.getNickname().equals(user.getNickname())){
-                checked.setConfirmStatus(ConfirmStatus.CONFIRMED_NICKNAME);
+                checked.setRegistrationStatus(ConfirmStatus.CONFIRMED_NICKNAME);
             }
         }
         return checked;
