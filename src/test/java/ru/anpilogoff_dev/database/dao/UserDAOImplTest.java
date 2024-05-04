@@ -47,7 +47,7 @@ class UserDAOImplTest {
         UserDataObject testUserObject = new UserDataObject(model);
         UserDataObject result = dao.create(testUserObject);
 
-        Assertions.assertEquals(ConfirmStatus.REG_SUCCESS,result.getConfirmStatus());
+        Assertions.assertEquals(ConfirmStatus.REG_SUCCESS,result.getRegistrationStatus());
         Assertions.assertNotSame(0,result.getConfirmCode());
     }
 
@@ -61,7 +61,7 @@ class UserDAOImplTest {
         UserDataObject testUserObject = new UserDataObject(model);
         //Check is registration not success
         UserDataObject result = dao.create(testUserObject);
-        Assertions.assertEquals(ConfirmStatus.REG_ERROR,result.getConfirmStatus());
+        Assertions.assertEquals(ConfirmStatus.REG_ERROR,result.getRegistrationStatus());
         verify(connectionMocked,times(1)).rollback();
 
     }
@@ -104,7 +104,7 @@ class UserDAOImplTest {
         Assertions.assertNotSame(null,result.getUserModel().getEmail());
         Assertions.assertNotSame(null,result.getUserModel().getNickname());
 
-        Assertions.assertNotSame(ConfirmStatus.UNKNOWN,result.getConfirmStatus());
+        Assertions.assertNotSame(ConfirmStatus.UNKNOWN,result.getRegistrationStatus());
     }
 
 }
