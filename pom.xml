@@ -96,7 +96,7 @@
     </dependencies>
 
     <build>
-        <finalName>THEproject-backend-fork-</finalName>
+        <finalName>THEproject</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
