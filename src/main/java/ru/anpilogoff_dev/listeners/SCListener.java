@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 
 @WebListener
 public class SCListener implements javax.servlet.ServletContextListener {
+
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         DataSource dataSource;
@@ -32,12 +33,23 @@ public class SCListener implements javax.servlet.ServletContextListener {
 
        final UserDAO userDao = new UserDAOImpl(dataSource);
        final SignUpService userService = new SignUpServiceImpl(userDao);
+
+        final ValidatorFactory factory = Validation.byProvider(HibernateValidator.class)
+                .configure()
+                .buildValidatorFactory();
         sce.getServletContext().setAttribute("userDataService", userService);
+        sce.getServletContext().setAttribute("factory", factory);
+
+
     }
 
     @Override
     public void
     contextDestroyed(ServletContextEvent sce) {
         sce.getServletContext().removeAttribute("userDataService");
+        ValidatorFactory factory = (ValidatorFactory) sce.getServletContext().getAttribute("factory");
+        if(factory != null){factory.close();}
+
+
     }
 }

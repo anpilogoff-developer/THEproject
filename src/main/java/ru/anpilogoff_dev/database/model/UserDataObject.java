@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString
 public class UserDataObject {
     private UserModel userModel;
-    private ConfirmStatus confirmStatus;
+    private ConfirmStatus registrationStatus;
     private int confirmCode;
 
     public UserDataObject(UserModel userModel){
@@ -19,13 +19,13 @@ public class UserDataObject {
     }
 
     public UserDataObject(ConfirmStatus confirmStatus, int confirmCode){
-        this.confirmStatus = confirmStatus;
+        this.registrationStatus = confirmStatus;
         this.confirmCode = confirmCode;
     }
 
     public UserDataObject(UserModel userModel, ConfirmStatus confirmStatus) {
         this.userModel = userModel;
-        this.confirmStatus = confirmStatus;
+        this.registrationStatus = confirmStatus;
     }
 
     public int generateConfirmCode(){

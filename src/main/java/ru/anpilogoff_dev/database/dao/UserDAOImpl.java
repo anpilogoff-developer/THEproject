@@ -65,14 +65,14 @@ public class UserDAOImpl implements UserDAO {
                         dbLogger.debug("  --Transaction commited... ");
 
                         object.setConfirmCode(confirmCode);
-                        object.setConfirmStatus(ConfirmStatus.REG_SUCCESS);
+                        object.setRegistrationStatus(ConfirmStatus.REG_SUCCESS);
                     } else anyErrors = true;
                 } else {
                     anyErrors = true;
                 }
                 if(anyErrors){
                     connection.rollback();
-                    object.setConfirmStatus(ConfirmStatus.REG_ERROR);
+                    object.setRegistrationStatus(ConfirmStatus.REG_ERROR);
                     dbLogger.debug("    ---Problem during new user data INSERT method: USER NOT REGISTERED");
                 }
         } catch (SQLException e) {
@@ -113,10 +113,10 @@ public class UserDAOImpl implements UserDAO {
                     object = new UserDataObject(model);
 
                     if (resultSet.getBoolean("confirmed")) {
-                        object.setConfirmStatus(ConfirmStatus.CONFIRMED);
+                        object.setRegistrationStatus(ConfirmStatus.CONFIRMED);
                         dbLogger.debug("  --confirmation status: CONFIRMED");
                     } else {
-                        object.setConfirmStatus(ConfirmStatus.UNCONFIRMED);
+                        object.setRegistrationStatus(ConfirmStatus.UNCONFIRMED);
                         dbLogger.debug("  --confirmation status: UNCONFIRMED");
                     }
                     dbLogger.debug("\n");
