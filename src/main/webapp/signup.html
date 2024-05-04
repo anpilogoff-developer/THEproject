@@ -6,7 +6,7 @@
 
     <style>
         input {
-          outline: none;
+            outline: none;
             background: gray;
             transition: 2s linear;
         }
@@ -36,11 +36,21 @@
     <div class="form_el"><label for="password">passwd: </label> <input id="password" type="text"></div>
     <div class="form_el"><label for="email" id="email_lbl">e-mail: </label> <input id="email" type="text"></div>
     <div class="form_el"><label id="nickname_lbl" for="nickname">nick: </label> <input id="nickname" type="text"></div>
+    <div class="form_el"><button id="submit">Отправить</button></div>
 </div>
 <div id="notification"></div>
 
 <script>
+    const login = document.getElementById('login');
+    const password = document.getElementById('password');
+    const email = document.getElementById('email');
+    const nickname = document.getElementById('nickname');
+
+    const submit = document.getElementById('submit');
+
     const notification = document.getElementById('notification');
+
+    const signup_endpoint = "http://localhost:8080//THEproject-backend-fork-/signup"
 
     function setValid(inp){
         inp.style.borderColor = 'green';  // Зеленая рамка, если логин валиден
@@ -54,9 +64,8 @@
         const input = event.target;
         const regex = /^[a-zA-Z0-9_]{7,15}$/;  // Регулярочка для валидации ввода логина..
 
-        if (regex.test(input.value)) {
-            setValid(input)
-        } else {
+        if (regex.test(input.value)) {setValid(input)}
+        else {
             setInvalid(input);
             notification.innerText = 'Логин должен быть от 7 до 15 символов и содержать только буквы, цифры и нижние подчеркивания.';
         }
@@ -64,11 +73,10 @@
 
     function validatePassword(event) {
         const input = event.target;
-        const regex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;   // .. для валидации ввода логина соответственно
+        const regex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;   // .. для валидации ввода пароля соответственно
 
-        if (regex.test(input.value)) {
-            setValid(input);
-        } else {
+        if (regex.test(input.value)) {setValid(input);}
+        else {
             setInvalid(input);
             notification.innerText = 'Пароль должен быть минимум 8 символов, содержать хотя бы одну заглавную букву и одну цифру.';
         }
@@ -76,12 +84,11 @@
 
     function validateEmail(event) {
         const input = event.target;
-        // Регулярное выражение для проверки формата электронной почты
-        const regex = /^[a-zA-Z0-9]{1,10}@[a-zA-Z0-9]{1,5}\.[a-zA-Z0-9]{1,5}$/;
 
-        if (regex.test(input.value)) {
-            setValid(input);
-        } else {
+        const regex = /^[a-zA-Z0-9]{1,10}@[a-zA-Z0-9]{1,5}\.[a-zA-Z0-9]{1,5}$/;  // ..для валидации почты
+
+        if (regex.test(input.value)) {setValid(input);}
+        else {
             setInvalid(input);
             notification.innerText =
                 'Электронный адрес должен содержать' +
@@ -91,9 +98,37 @@
     }
 
 
-    document.getElementById('login').addEventListener('keyup', validateLogin);
-    document.getElementById('password').addEventListener('keyup', validatePassword);
-    document.getElementById('email').addEventListener('keyup', validateEmail);
+    submit.addEventListener('click', function(event) {
+        event.preventDefault();
+
+        const formData = new URLSearchParams();
+        formData.append('login', login.value);
+        formData.append('password', password.value);
+        formData.append('email', email.value);
+        formData.append('nickname', nickname.value);
+
+        fetch(signup_endpoint, {
+            method: 'POST',
+            body: formData
+        }).then(response => response.json())
+            .then(data => {
+                if (data.errors && data.errors.length > 0) {
+                    // Преобразование каждого объекта ошибки в строку и объединение их в одну строку
+                    notification.innerText = data.errors.map(error => `${error.field}: ${error.message}`).join('\n');
+                } else {
+                    // Если ошибок нет, можно установить другое сообщение или обработать успешный ответ
+                    notification.innerText = 'Регистрация прошла успешно!';
+                }
+            })
+            .catch(error => {notification.innerText = error});
+    });
+
+
+
+
+    login.addEventListener('keyup', validateLogin);
+    password.addEventListener('keyup', validatePassword);
+    email.addEventListener('keyup', validateEmail);
 
 
 
