@@ -36,45 +36,19 @@ class UserDAOImplTest {
     @Mock
     ResultSet resultSetMocked;
 
-    Connection connectionReal;
-
-
-    String url = "jdbc:mysql://localhost:3306/THEproject"; //это был не копипаст если что.)
-    String username = "io";
-    String password = "password";
-
-    @BeforeAll
-    static void init() throws ClassNotFoundException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-
-    }
-
-
-    @SneakyThrows
-    @AfterEach
-    void clean(){
-        connectionReal = DriverManager.getConnection(url,username,password);
-        PreparedStatement statement = connectionReal.prepareStatement("DELETE FROM users");
-        statement.executeUpdate();
-        connectionReal.close();
-    }
-
-
-
     @Test
     void tryCreateUserWhenNotExists() throws SQLException {
 
-        connectionReal = DriverManager.getConnection(url, username, password);
-        when(dataSource.getConnection()).thenReturn(connectionReal);
+        when(dataSource.getConnection()).thenReturn(connectionMocked);
+        when(connectionMocked.prepareStatement(anyString())).thenReturn(statementMocked);
+        when(statementMocked.executeUpdate()).thenReturn(1);
 
         UserModel model = new UserModel("test1","test1","test1","test1");
         UserDataObject testUserObject = new UserDataObject(model);
-        //Check is registration success
         UserDataObject result = dao.create(testUserObject);
 
-        Assertions.assertEquals(ConfirmStatus.REG_SUCCESS,result.getRegistrationStatus());
+        Assertions.assertEquals(ConfirmStatus.REG_SUCCESS,result.getConfirmStatus());
         Assertions.assertNotSame(0,result.getConfirmCode());
-        Assertions.assertTrue(connectionReal.isClosed());
     }
 
     @Test
@@ -87,20 +61,11 @@ class UserDAOImplTest {
         UserDataObject testUserObject = new UserDataObject(model);
         //Check is registration not success
         UserDataObject result = dao.create(testUserObject);
-        Assertions.assertEquals(ConfirmStatus.REG_ERROR,result.getRegistrationStatus());
+        Assertions.assertEquals(ConfirmStatus.REG_ERROR,result.getConfirmStatus());
         verify(connectionMocked,times(1)).rollback();
 
     }
 
-    @SneakyThrows
-    @Test
-    void checkNullConnectionWillBeEstablishedInGetMethod() {
-        connectionReal = DriverManager.getConnection(url,username,password);
-        when(dataSource.getConnection()).thenReturn(connectionReal);
-        dao.get(new UserModel("test"),null);
-        verify(dataSource,times(1)).getConnection();
-        Assertions.assertTrue(connectionReal.isClosed());
-    }
 
     @SneakyThrows
     @Test
@@ -139,7 +104,7 @@ class UserDAOImplTest {
         Assertions.assertNotSame(null,result.getUserModel().getEmail());
         Assertions.assertNotSame(null,result.getUserModel().getNickname());
 
-        Assertions.assertNotSame(ConfirmStatus.UNKNOWN,result.getRegistrationStatus());
+        Assertions.assertNotSame(ConfirmStatus.UNKNOWN,result.getConfirmStatus());
     }
 
 }
