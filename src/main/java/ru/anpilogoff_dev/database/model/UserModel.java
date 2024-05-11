@@ -21,7 +21,7 @@ public class UserModel {
     private String password;
     private String nickname;
 
-   @Pattern(regexp = "^[a-zA-Z0-9]{1,10}@[a-zA-Z0-9]{1,5}\\.[a-zA-Z0-9]{1,5}$",message = "Invalid email value")
+   @Pattern(regexp = "^[a-zA-Z0-9]{1,20}@[a-zA-Z0-9]{1,15}\\.[a-zA-Z0-9]{1,10}$",message = "Invalid email value")
     private String email;
 
     private String registrationDate;

@@ -7,5 +7,7 @@ import java.sql.Connection;
 
 public interface UserDAO {
     UserDataObject create(UserDataObject model);
-    UserDataObject get(UserModel model, Connection connection);
+    UserDataObject get(UserModel model);
+
+    boolean confirm(String confirmCode);
 }
