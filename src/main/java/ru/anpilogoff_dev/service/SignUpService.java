@@ -6,7 +6,7 @@ import ru.anpilogoff_dev.database.model.UserModel;
 
 public interface SignUpService {
     UserDataObject registerUser(UserDataObject user);
-    boolean confirmEmail(UserDataObject object);
+    boolean confirmRegistration(String confirmCode);
 
     UserDataObject checkIsUserExist(@Valid UserModel user);
 
