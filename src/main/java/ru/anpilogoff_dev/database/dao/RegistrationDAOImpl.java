@@ -13,15 +13,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UserDAOImpl implements UserDAO {
+public class RegistrationDAOImpl implements RegistrationDAO {
     private final DataSource dataSource;
 
-    public UserDAOImpl(DataSource dataSource) {
+    public RegistrationDAOImpl(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
     private static final Logger dbLogger = LogManager.getLogger("DatabaseLogger");
     private static final Logger dbErrorLogger = LogManager.getLogger("DatabaseErrorLogger");
+    private static final Logger log = LogManager.getLogger("RuntimeLogger");
+
 
 
 
@@ -75,6 +77,7 @@ public class UserDAOImpl implements UserDAO {
                 }
                 if(anyErrors){
                     connection.rollback();
+                    connection.setAutoCommit(true);
                     object.setRegistrationStatus(RegistrationStatus.REG_ERROR);
                     dbLogger.debug("    ---Problem during new user data INSERT method: USER NOT REGISTERED");
                 }
@@ -87,8 +90,8 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public  UserDataObject get(UserModel model) {
-        dbLogger.debug("signupDAO: get()");
+    public synchronized UserDataObject get(UserModel model) {
+        log.debug("UserDAOImpl: get(model)... ");
         UserDataObject object = null;
 
         String getQuery = "SELECT * FROM users WHERE login = ? OR email = ? OR nickname = ? ";
@@ -99,37 +102,41 @@ public class UserDAOImpl implements UserDAO {
             getStatement.setString(2,model.getEmail());
             getStatement.setString(3,model.getNickname());
             try (ResultSet resultSet = getStatement.executeQuery()) {
-                dbLogger.debug("  --Checking is users exists.");
                 if (resultSet.next()) {
-                    dbLogger.debug("  --User already exists;");
-                    model.setPassword(resultSet.getString("password"));
-                    model.setEmail(resultSet.getString("email"));
-                    model.setNickname(resultSet.getString("nickname"));
+                    UserModel user = new UserModel();
 
-                    object = new UserDataObject(model);
+                    user.setLogin(resultSet.getString("login"));
+                    user.setPassword(resultSet.getString("password"));
+                    user.setEmail(resultSet.getString("email"));
+                    user.setNickname(resultSet.getString("nickname"));
+
+                    object = new UserDataObject(user);
 
                     if (resultSet.getBoolean("confirmed")) {
                         object.setRegistrationStatus(RegistrationStatus.CONFIRMED);
-                        dbLogger.debug("  --confirmation status: CONFIRMED");
+                        log.debug("  --confirmation status: CONFIRMED");
                     } else {
                         object.setRegistrationStatus(RegistrationStatus.UNCONFIRMED);
                         dbLogger.debug("  --confirmation status: UNCONFIRMED");
                     }
                 } else dbLogger.debug("  --User NOT exists;");
+            }catch (RuntimeException e){
+                log.debug("ошибка при выполнении getQuery(SQL)" + e.getMessage());
             }
-
         } catch (SQLException e) {
-            dbErrorLogger.warn("    ---Error during query execution: \n" + e.getMessage());
+            dbErrorLogger.warn("    ---Error during connection establishment: \n" + e.getMessage());
             throw new RuntimeException(e);
         }
         return object;
     }
 
+
+    //WARNING:
     @Override
-    public boolean confirm(String confirmCode) {
+    public synchronized boolean confirm(String confirmCode) {
         dbLogger.debug("signupDAO: confirmUser()");
         boolean isConfirmed = false;
-        String deleteConfirmCodeQuery = "DELETE FROM users_confirm_codes WHERE user_login = (?)";
+        String deleteConfirmCodeQuery = "DELETE FROM users_confirm_codes WHERE confirm_code = (?)";
         try(
             Connection connection = dataSource.getConnection();
             PreparedStatement deleteStatement = connection.prepareStatement(deleteConfirmCodeQuery)

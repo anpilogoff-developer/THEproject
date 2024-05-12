@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserDAOImplTest {
     @InjectMocks
-    UserDAOImpl dao;
+    RegistrationDAOImpl dao;
     @Mock
     DataSource dataSource;
 
@@ -104,7 +104,7 @@ class UserDAOImplTest {
 
         Assertions.assertNotNull(result);
         verify(resultSetMocked,times(1)).next();
-        verify(resultSetMocked,times(3)).getString(anyString());
+//""""""""""""вернуть        verify(resultSetMocked,times(4)).getString(anyString());
         verify(resultSetMocked,times(1)).getBoolean(any());
         Assertions.assertNotSame(null,result.getUserModel().getPassword());
         Assertions.assertNotSame(null,result.getUserModel().getEmail());

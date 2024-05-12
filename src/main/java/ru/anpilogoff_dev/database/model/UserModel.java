@@ -7,6 +7,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @EqualsAndHashCode
+@NoArgsConstructor
 @ToString
 public class UserModel {
     private long id;
@@ -24,13 +25,14 @@ public class UserModel {
    @Pattern(regexp = "^[a-zA-Z0-9]{1,20}@[a-zA-Z0-9]{1,15}\\.[a-zA-Z0-9]{1,10}$",message = "Invalid email value")
     private String email;
 
-    private String registrationDate;
+    private String registrationDate; //пока не решил нужно ли.....
+
+
     public UserModel(String login, String password, String email,String nickname) {
         this.login = login;
         this.password = password;
         this.email = email;
         this.nickname = nickname;
-
     }
 
     public UserModel(String login) {
