@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.validator.HibernateValidator;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import ru.anpilogoff_dev.database.model.RegistrationStatus;
 import ru.anpilogoff_dev.database.model.UserDataObject;
 import ru.anpilogoff_dev.database.model.UserModel;
 import ru.anpilogoff_dev.listeners.SCListener;
@@ -26,13 +27,13 @@ import java.util.List;
 import java.util.Set;
 
 public class SignUpFilter implements Filter {
-    private static final Logger log = LogManager.getLogger("HttpRequestLogger");
+    private static final Logger log = LogManager.getLogger("RuntimeLogger");
 
     private Validator validator;
     @Override
     public void init(FilterConfig filterConfig) {
        ValidatorFactory factory = (ValidatorFactory) filterConfig.getServletContext().getAttribute("factory");
-       validator = factory.getValidator();
+       this.validator = factory.getValidator();
     }
 
 
@@ -40,12 +41,19 @@ public class SignUpFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
         HttpServletResponse resp = (HttpServletResponse) servletResponse;
+        String method = req.getMethod();
 
         if (req.getSession(false) != null && req.getHeader("Authorization") != null) {
             resp.sendRedirect(req.getServletContext().getContextPath() + "/home");
-        }else if(req.getMethod().equals("GET")){
+        }else if(method.equals("GET")){
+            if(req.getRequestURI().contains("confirmation")){
+                String param = req.getParameter("confirmation");
+                if(param == null || param.isEmpty()) {
+                    req.getRequestDispatcher("signup.html").forward(req, resp);
+                }
+            }
             filterChain.doFilter(req,resp);
-        }else if (req.getMethod().equals("POST")) {
+        }else if (method.equals("POST")) {
             Writer writer = resp.getWriter();
 
             resp.setCharacterEncoding("UTF-8");
@@ -66,40 +74,38 @@ public class SignUpFilter implements Filter {
 
             if (allParamsNotEmpty) {
                 UserModel model = new UserModel(params.get(0), params.get(1), params.get(2), params.get(3));
-
                 //валидация параметров для регистрации
                 JSONObject paramsValidationErrors = validateParams(model);
 
                 if(paramsValidationErrors !=null) {
                     writer.write(paramsValidationErrors.toString());
                     writer.flush();
+                    writer.close();
                 } else {
-                    log.debug("SignupFilter: params validation passed -> Service.checkIsUserExist()");
-
                     SignUpService service = (SignUpService) req.getServletContext().getAttribute("userDataService");
                     //проверка существования пользователя
-                    UserDataObject object = service.checkIsUserExist(model);
+                    UserDataObject isExist = service.checkIsUserExist(model);
 
-                    if(object != null) {
-                        log.debug("SignupFilter: User EXISTS");
-
+                    if(isExist != null) {
                         JSONObject alreadyExistJsonResponse = new JSONObject();
                         alreadyExistJsonResponse.put("success",false);
                         alreadyExistJsonResponse.put("valid",true);
 
-                        switch (object.getRegistrationStatus()) {
-                            case CONFIRMED_LOGIN:
+                        switch (isExist.getRegistrationStatus()) {
+                            case LOGIN_EXISTS:
                                 alreadyExistJsonResponse.put("reason","login");
                                 break;
-                            case CONFIRMED_EMAIL:
+                            case EMAIL_EXISTS:
                                 alreadyExistJsonResponse.put("reason","email");
                                 break;
-                            case CONFIRMED_NICKNAME:
+                            case NICKNAME_EXISTS:
                                 alreadyExistJsonResponse.put("reason","nickname");
                                 break;
                             case UNCONFIRMED:
                                 alreadyExistJsonResponse.put("reason","unconfirmed");
                                 break;
+                            case CONFIRMED:
+                                alreadyExistJsonResponse.put("reason", "existed_user_data");
                         }
                         writer.write(alreadyExistJsonResponse.toString());
                         writer.flush();
@@ -131,7 +137,7 @@ public class SignUpFilter implements Filter {
                 log.debug("VALIDATOR: NOT VALID VALUE:   " + violation.getMessage() + "\n");
 
                 JSONObject error = new JSONObject();
-                error.put("param",violation.getPropertyPath());
+                error.put("parameter",violation.getPropertyPath());
                 error.put("message",violation.getMessage());
                 errors.put(error);
             }
