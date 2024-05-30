@@ -46,12 +46,12 @@ class UserDAOImplTest {
         when(connectionMocked.prepareStatement(anyString())).thenReturn(statementMocked);
         when(statementMocked.executeUpdate()).thenReturn(1);
 
-        UserModel model = new UserModel("test1","test1","test1","test1");
+        UserModel model = new UserModel("test1", "test1", "test1", "test1");
         UserDataObject testUserObject = new UserDataObject(model);
         UserDataObject result = dao.create(testUserObject);
 
-        Assertions.assertEquals(RegistrationStatus.REG_SUCCESS,result.getRegistrationStatus());
-        Assertions.assertNotSame("0",result.getConfirmCode());
+        Assertions.assertEquals(RegistrationStatus.REG_SUCCESS, result.getRegistrationStatus());
+        Assertions.assertNotSame("0", result.getConfirmCode());
 
     }
 
@@ -61,19 +61,19 @@ class UserDAOImplTest {
         when(connectionMocked.prepareStatement(anyString())).thenReturn(statementMocked);
         when(statementMocked.executeUpdate()).thenReturn(0);
 
-        UserModel model = new UserModel("test1","test1","test1","test1");
+        UserModel model = new UserModel("test1", "test1", "test1", "test1");
         UserDataObject testUserObject = new UserDataObject(model);
         //Check is registration not success
         UserDataObject result = dao.create(testUserObject);
-        Assertions.assertEquals(RegistrationStatus.REG_ERROR,result.getRegistrationStatus());
-        verify(connectionMocked,times(1)).rollback();
+        Assertions.assertEquals(RegistrationStatus.REG_ERROR, result.getRegistrationStatus());
+        verify(connectionMocked, times(1)).rollback();
 
     }
 
 
     @SneakyThrows
     @Test
-    void checkIsUserObjectOnNullWhenUserNotExistInGetMethod(){
+    void checkIsUserObjectOnNullWhenUserNotExistInGetMethod() {
         UserModel userModel = Mockito.mock(UserModel.class);
         when(dataSource.getConnection()).thenReturn(connectionMocked);
 
@@ -83,18 +83,18 @@ class UserDAOImplTest {
 
         UserDataObject result = dao.get(userModel);
 
-        verify(userModel,times(0)).setPassword(anyString());
-        verify(userModel,times(0)).setEmail(anyString());
-        verify(userModel,times(0)).setNickname(anyString());
+        verify(userModel, times(0)).setPassword(anyString());
+        verify(userModel, times(0)).setEmail(anyString());
+        verify(userModel, times(0)).setNickname(anyString());
         Assertions.assertNull(result);
 
     }
 
     @Test
     @SneakyThrows
-    void checkIsUserObjectNotNullWhenUserExistInGetMethod(){
+    void checkIsUserObjectNotNullWhenUserExistInGetMethod() {
         when(dataSource.getConnection()).thenReturn(connectionMocked);
-        UserModel userModel = new UserModel("s","null","null","null");
+        UserModel userModel = new UserModel("s", "null", "null", "null");
         when(connectionMocked.prepareStatement(anyString())).thenReturn(statementMocked);
         when(statementMocked.executeQuery()).thenReturn(resultSetMocked);
         when(resultSetMocked.next()).thenReturn(true);
@@ -103,24 +103,24 @@ class UserDAOImplTest {
         UserDataObject result = dao.get(userModel);
 
         Assertions.assertNotNull(result);
-        verify(resultSetMocked,times(1)).next();
+        verify(resultSetMocked, times(1)).next();
 //""""""""""""вернуть        verify(resultSetMocked,times(4)).getString(anyString());
-        verify(resultSetMocked,times(1)).getBoolean(any());
-        Assertions.assertNotSame(null,result.getUserModel().getPassword());
-        Assertions.assertNotSame(null,result.getUserModel().getEmail());
-        Assertions.assertNotSame(null,result.getUserModel().getNickname());
+        verify(resultSetMocked, times(1)).getBoolean(any());
+        Assertions.assertNotSame(null, result.getUserModel().getPassword());
+        Assertions.assertNotSame(null, result.getUserModel().getEmail());
+        Assertions.assertNotSame(null, result.getUserModel().getNickname());
 
-        Assertions.assertNotSame(RegistrationStatus.UNKNOWN,result.getRegistrationStatus());
+        Assertions.assertNotSame(RegistrationStatus.UNKNOWN, result.getRegistrationStatus());
     }
 
     @SneakyThrows
     @Test
-    void checkRollBackOnTryToConfirmInvalidCode(){
+    void checkRollBackOnTryToConfirmInvalidCode() {
         when(dataSource.getConnection()).thenReturn(connectionMocked);
         when(connectionMocked.prepareStatement(anyString())).thenReturn(statementMocked);
         when(statementMocked.executeUpdate()).thenReturn(0);
         boolean result = dao.confirm("invalidCode");
-        verify(connectionMocked,times(1)).rollback();
+        verify(connectionMocked, times(1)).rollback();
         Assertions.assertFalse(result);
     }
 

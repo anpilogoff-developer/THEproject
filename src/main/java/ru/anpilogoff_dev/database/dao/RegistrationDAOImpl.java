@@ -77,10 +77,10 @@ public class RegistrationDAOImpl implements RegistrationDAO {
                 }
                 if(anyErrors){
                     connection.rollback();
-                    connection.setAutoCommit(true);
                     object.setRegistrationStatus(RegistrationStatus.REG_ERROR);
                     dbLogger.debug("    ---Problem during new user data INSERT method: USER NOT REGISTERED");
                 }
+            connection.setAutoCommit(true);
         } catch (SQLException e) {
             dbErrorLogger.warn("SQLException while INSERT QUERY execution:  " + e.getMessage() + "\n" + "  " + e);
             throw new RuntimeException(e);
@@ -112,13 +112,15 @@ public class RegistrationDAOImpl implements RegistrationDAO {
 
                     object = new UserDataObject(user);
 
-                    if (resultSet.getBoolean("confirmed")) {
-                        object.setRegistrationStatus(RegistrationStatus.CONFIRMED);
-                        log.debug("  --confirmation status: CONFIRMED");
-                    } else {
-                        object.setRegistrationStatus(RegistrationStatus.UNCONFIRMED);
-                        dbLogger.debug("  --confirmation status: UNCONFIRMED");
-                    }
+                        if (resultSet.getBoolean("confirmed")) {
+                            object.setRegistrationStatus(RegistrationStatus.CONFIRMED);
+                            log.debug("  --confirmation status: CONFIRMED");
+                        } else {
+
+                            object.setRegistrationStatus(RegistrationStatus.UNCONFIRMED);
+                            dbLogger.debug("  --confirmation status: UNCONFIRMED");
+                        }
+
                 } else dbLogger.debug("  --User NOT exists;");
             }catch (RuntimeException e){
                 log.debug("ошибка при выполнении getQuery(SQL)" + e.getMessage());
@@ -152,6 +154,7 @@ public class RegistrationDAOImpl implements RegistrationDAO {
                 dbLogger.debug("  --User confirmation code deletion - FAILED");
                 connection.rollback();
             }
+            connection.setAutoCommit(true);
         }catch (SQLException e){
             dbErrorLogger.warn("SQLException while DELETE QUERY execution:  " + e.getMessage());
             throw new RuntimeException(e);

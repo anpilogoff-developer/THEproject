@@ -4,8 +4,9 @@ import ru.anpilogoff_dev.database.model.UserDataObject;
 import ru.anpilogoff_dev.database.model.UserModel;
 
 public interface RegistrationDAO {
-    UserDataObject create(UserDataObject model);
-    UserDataObject get(UserModel model);
+    UserDataObject create(UserDataObject userDataObject);
 
-    boolean confirm(String confirmCode);
+    UserDataObject get(UserModel user);
+
+    boolean confirm(String code);
 }

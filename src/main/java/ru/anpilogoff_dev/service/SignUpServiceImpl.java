@@ -42,6 +42,6 @@ public class SignUpServiceImpl implements SignUpService {
                 checked.setRegistrationStatus(RegistrationStatus.NICKNAME_EXISTS);
             }
         }
-return checked;
+        return checked;
     }
 }

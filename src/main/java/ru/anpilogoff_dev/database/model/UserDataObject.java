@@ -16,11 +16,11 @@ public class UserDataObject {
     private RegistrationStatus registrationStatus;
     private String confirmCode;
 
-    public UserDataObject(UserModel userModel){
+    public UserDataObject(UserModel userModel) {
         this.userModel = userModel;
     }
 
-    public UserDataObject(RegistrationStatus confirmStatus, String confirmCode){
+    public UserDataObject(RegistrationStatus confirmStatus, String confirmCode) {
         this.registrationStatus = confirmStatus;
         this.confirmCode = confirmCode;
     }
@@ -30,7 +30,7 @@ public class UserDataObject {
         this.registrationStatus = confirmStatus;
     }
 
-    public String generateConfirmCode(){
+    public String generateConfirmCode() {
         return UUID.randomUUID().toString();
     }
 }

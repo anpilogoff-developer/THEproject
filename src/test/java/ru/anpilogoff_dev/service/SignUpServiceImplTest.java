@@ -10,6 +10,7 @@ import ru.anpilogoff_dev.database.dao.RegistrationDAO;
 import ru.anpilogoff_dev.database.model.RegistrationStatus;
 import ru.anpilogoff_dev.database.model.UserDataObject;
 import ru.anpilogoff_dev.database.model.UserModel;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
@@ -27,7 +28,6 @@ class SignUpServiceImplTest {
     UserDataObject object;
 
 
-
     @Test
     void registerUser() {
         UserModel userModel = new UserModel("test", "test", "test", "test");
@@ -43,18 +43,20 @@ class SignUpServiceImplTest {
 
     @Test
     void getUser() {
-       UserModel model = new UserModel("test","test","test","test");
+        UserModel model = new UserModel("test", "test", "test", "test");
         when(regDAO.get(model)).thenReturn(object);
         when(object.getUserModel()).thenReturn(model);
         UserDataObject object = service.checkIsUserExist(model);
         verify(regDAO, times(1)).get(model);
-        verify(object,times(1)).getUserModel();
-        verify(object,times(1)).setRegistrationStatus(any(RegistrationStatus.class));
+        verify(object, times(1)).getUserModel();
+        verify(object, times(1)).setRegistrationStatus(any(RegistrationStatus.class));
         Assertions.assertNotNull(object);
     }
 
     @Test
-    void confirmRegistrationTest(){
-
+    void confirmRegistrationTest() {
+        when(regDAO.confirm(anyString())).thenReturn(true);
+       boolean confirmed = service.confirmRegistration(anyString());
+       Assertions.assertTrue(confirmed);
     }
 }
