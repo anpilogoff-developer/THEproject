@@ -238,7 +238,7 @@ Deploy the application on a VPS with Ubuntu 22.04 and the domain anpilogoff-dev.
     ```bash
       sudo apt install mysqltuner
     ```
-s
+
 </details>
 
 <details>
@@ -281,7 +281,8 @@ s
     ```bash
       sudo systemctl disable nginx  
       #соответственно 'enable' дабы достичь обратного результата
-    ```
+    ```  
+  
 </details>
 
 <details>
@@ -309,9 +310,43 @@ s
   которых будет 30 дней или меньше. Статус таймера проверяется командой:
 
     ```bash
-    sudo systemctl status certbot.timer
-    ```
+    ```  
 </details>
+<details>  
+<summary>7.Отправка e-mail</summary>  
+
+- Устанавливаю "Postfix"(Mail Transfer Agent):  
+
+  ```bash
+    sudo apt install postfix
+  ```  
+  
+- Вносим изменения в файл /etc/postfix/main.cf:
+  ```bash
+    smtp_tls_CApath = /etc/ssl/certs  
+             Указывает путь к директории, содержащей доверенные CA сертификаты,
+             используемые для проверки сертификатов серверов при установлении исходящих соединений.
+  
+    smtp_tls_security_level=encrypt  
+             Устанавливает уровень безопасности TLS для исходящих соединений на "encrypt", требуя шифрование ВСЕХ соединений 
+    
+     smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache  
+             Определяет базу данных для кэширования параметров сессии TLS исходящих соединений, 
+             что может ускорить повторные соединения.  
+    
+     myhostname = anpilogoff-dev.ru: Указывает имя хоста почтового сервера.  
+  
+    inet_interfaces = loopback-only  
+            "loopback-only" если есть необходимость использовать сервер только для отправки исходящей почты, all - наоборот.  
+    
+    relayhost =    
+             Отсутствие значения указывает, что сервер напрямую доставляет исходящую почту, без использования внешнего ретранслятора.  
+    
+    
+  ```
+</details>
+
+
 
 
 
