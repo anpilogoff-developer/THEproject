@@ -15,8 +15,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
+
 public class SignUpServlet extends HttpServlet {
     private static final Logger log = LogManager.getLogger("HttpRequestLogger");
+    private static final Logger logger = LogManager.getLogger(SignUpServlet.class);
     private SignUpService signupService;
     private EmailService emailService;
 
@@ -53,13 +55,10 @@ public class SignUpServlet extends HttpServlet {
                 req.getParameter("nickname")
         );
 
-
-
         UserDataObject object = new UserDataObject(userModel, RegistrationStatus.UNKNOWN);
 
         //попытка регистрации нового пользователя
         object = signupService.registerUser(object);
-
         JSONObject responseJson = new JSONObject();
 
         switch (object.getRegistrationStatus()){
@@ -74,8 +73,7 @@ public class SignUpServlet extends HttpServlet {
 
                 responseJson.put("success",false);
                 responseJson.put("reason","server error");
-
-                 break;
+                break;
         }
         writer.write(responseJson.toString());
         writer.flush();

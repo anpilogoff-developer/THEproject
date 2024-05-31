@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import ru.anpilogoff_dev.database.model.UserDataObject;
 import ru.anpilogoff_dev.database.model.UserModel;
 import ru.anpilogoff_dev.service.SignUpService;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,7 +22,7 @@ import java.util.Set;
 
 public class SignUpFilter implements Filter {
     private static final Logger log = LogManager.getLogger("RuntimeLogger");
-
+    private static final Logger logger = LogManager.getLogger(SignUpFilter.class);
     private Validator validator;
 
     @Override
@@ -140,7 +139,6 @@ public class SignUpFilter implements Filter {
                 error.put("message", violation.getMessage());
                 errors.put(error);
             }
-
             validationError = new JSONObject();
             validationError.put("success", false);
             validationError.put("valid", false);

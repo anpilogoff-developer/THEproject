@@ -24,10 +24,6 @@ public class RegistrationDAOImpl implements RegistrationDAO {
     private static final Logger dbErrorLogger = LogManager.getLogger("DatabaseErrorLogger");
     private static final Logger log = LogManager.getLogger("RuntimeLogger");
 
-
-
-
-    @SneakyThrows
     @Override
     public synchronized UserDataObject create(UserDataObject object) {
         dbLogger.debug("signupDAO: create()");
@@ -40,7 +36,7 @@ public class RegistrationDAOImpl implements RegistrationDAO {
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement insertStatement = connection.prepareStatement(createQuery);
-                PreparedStatement confirmCodeStatement = connection.prepareStatement(setConfirmCodeQuery);
+                PreparedStatement confirmCodeStatement = connection.prepareStatement(setConfirmCodeQuery)
         ) {
             con = connection;
             connection.setAutoCommit(false);
@@ -85,7 +81,6 @@ public class RegistrationDAOImpl implements RegistrationDAO {
             dbErrorLogger.warn("SQLException while INSERT QUERY execution:  " + e.getMessage() + "\n" + "  " + e);
             throw new RuntimeException(e);
         }
-        dbLogger.debug("  --Connection is closed? : " + con + ":  " + con.isClosed()+ "\n");
         return object;
     }
 

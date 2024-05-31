@@ -2,7 +2,6 @@ package ru.anpilogoff_dev.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import javax.mail.Message;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -16,17 +15,15 @@ import java.util.Properties;
 
 public class EmailService {
     private static final Logger log = LogManager.getLogger("RuntimeLogger");
-    private Properties mailProperties;
+    private final Properties mailProperties;
 
     public EmailService() {
-        try {
-            InputStream input = EmailService.class.getClassLoader().getResourceAsStream("mail.properties");
+        try(InputStream input = EmailService.class.getClassLoader().getResourceAsStream("mail.properties")){
             this.mailProperties = new Properties();
             if (input == null) {
                 log.debug("Не удалось найти файл mail.properties");
             } else {
                 this.mailProperties.load(input);
-                input.close();
             }
         } catch (IOException e) {
             log.debug((new StringBuilder("ошибка при загрузки файла mail.property")).append(e.getMessage()));
