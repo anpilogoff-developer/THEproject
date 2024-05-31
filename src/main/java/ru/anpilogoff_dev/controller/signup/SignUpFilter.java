@@ -107,7 +107,7 @@ public class SignUpFilter implements Filter {
                         writer.flush();
                         writer.close();
                     } else {
-                        log.debug("SignupFilter: NOT EXISTS");
+                        log.debug("SignupFilter.doFilter():  user  DOESN'T NOT EXISTS");
                         filterChain.doFilter(servletRequest, servletResponse);
                     }
                 }

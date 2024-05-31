@@ -63,7 +63,7 @@ public class SignUpServlet extends HttpServlet {
 
         switch (object.getRegistrationStatus()){
             case REG_SUCCESS:
-                log.debug("  --registration success:"+object);
+                log.debug("  --registration success: " + object);
 
                 emailService.sendConfirmationEmail(object.getUserModel().getEmail(),object.getConfirmCode());
                 responseJson.put("success",true);
