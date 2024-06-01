@@ -13,6 +13,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Реализация интерфейса RegistrationDAO для работы с базой данных.
+ */
 public class RegistrationDAOImpl implements RegistrationDAO {
     private final DataSource dataSource;
 
@@ -24,6 +27,12 @@ public class RegistrationDAOImpl implements RegistrationDAO {
     private static final Logger dbErrorLogger = LogManager.getLogger("DatabaseErrorLogger");
     private static final Logger log = LogManager.getLogger("RuntimeLogger");
 
+    /**
+     * Создает новую запись пользователя в базе данных.
+     *
+     * @param object Объект данных пользователя для регистрации.
+     * @return Объект данных пользователя с обновленным статусом регистрации.
+     */
     @Override
     public synchronized UserDataObject create(UserDataObject object) {
         dbLogger.debug("signupDAO: create()");
@@ -31,14 +40,13 @@ public class RegistrationDAOImpl implements RegistrationDAO {
         String setConfirmCodeQuery = "INSERT INTO users_confirm_codes (user_login,confirm_code) VALUES (?,?)";
 
         UserModel model = object.getUserModel();
-        Connection con;
         boolean anyErrors = false;
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement insertStatement = connection.prepareStatement(createQuery);
                 PreparedStatement confirmCodeStatement = connection.prepareStatement(setConfirmCodeQuery)
         ) {
-            con = connection;
+
             connection.setAutoCommit(false);
 
                 dbLogger.debug("  --Trying to insert new user...");
@@ -84,6 +92,11 @@ public class RegistrationDAOImpl implements RegistrationDAO {
         return object;
     }
 
+    /**
+     * Получает информацию о пользователе из базы данных.
+     * @param model Модель пользователя для поиска.
+     * @return  Объект данных пользователя с установленными параметрами если найден или null.
+     */
     @Override
     public synchronized UserDataObject get(UserModel model) {
         log.debug("UserDAOImpl: get(model)... ");
@@ -127,10 +140,34 @@ public class RegistrationDAOImpl implements RegistrationDAO {
         return object;
     }
 
-
+    /**
+     * Подтверждает регистрацию пользователя по коду подтверждения.
+     * На уровне СУБД был создан триггер:
+     *
+     * @param confirmCode Код подтверждения.
+     * @return true, если подтверждение успешно.
+     */
     //WARNING:
     @Override
     public synchronized boolean confirm(String confirmCode) {
+        /*
+        !!!!!!!!! ИСПОЛЬЗОВАН ТРИГГЕР НА УРОВНЕ СУБД!!!!!!!!!!!!
+
+        DELIMITER //
+
+        CREATE TRIGGER after_confirm_code_deletion
+        AFTER DELETE ON users_confirm_codes FOR EACH ROW
+        BEGIN
+            UPDATE users
+            SET confirmed = true
+            WHERE login = OLD.user_login;
+        END;
+
+        //
+        DELIMITER ;
+
+         */
+
         dbLogger.debug("signupDAO: confirmUser()");
         boolean isConfirmed = false;
         String deleteConfirmCodeQuery = "DELETE FROM users_confirm_codes WHERE confirm_code = (?)";

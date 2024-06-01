@@ -3,9 +3,12 @@ package ru.anpilogoff_dev.database.model;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
+
+/**
+ * Класс модели данных пользователя, используемая для регистрации и управления учетными записями.
+ */
 @Getter
 @Setter
-@AllArgsConstructor
 @EqualsAndHashCode
 @NoArgsConstructor
 @ToString

@@ -20,17 +20,38 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Фильтр, перехватывающий запросы к странице регистрации.
+ * Инициализирует валидатор и обрабатывает GET и POST запросы.
+ */
 public class SignUpFilter implements Filter {
     private static final Logger log = LogManager.getLogger("RuntimeLogger");
     private static final Logger logger = LogManager.getLogger(SignUpFilter.class);
+
+    /**
+     * Предоставляет методы для валидации объектов Java Bean согласно ограничениям, определенным аннотациями валидации.
+     */
     private Validator validator;
 
+    /**
+     * Получение экземпляра ValidatorFactory из атрибутов контекста сервлета и последующее создание валидатора.
+     */
     @Override
     public void init(FilterConfig filterConfig) {
         ValidatorFactory factory = (ValidatorFactory) filterConfig.getServletContext().getAttribute("factory");
         this.validator = factory.getValidator();
     }
 
+    /**
+     * Метод фильтрации HTTP-запросов для регистрации пользователя.
+     * Перенаправляет уже авторизованных пользователей на главную страницу.
+     * Обрабатывает GET-запросы для подтверждения регистрации и POST-запросы для регистрации пользователя.
+     * @param servletRequest  Запрос к сервлету.
+     * @param servletResponse Ответ сервлета.
+     * @param filterChain     Цепочка фильтров.
+     * @throws IOException      В случае ошибки ввода/вывода.
+     * @throws ServletException В случае ошибки сервлета.
+     */
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
@@ -115,16 +136,17 @@ public class SignUpFilter implements Filter {
         }
     }
 
-    //валидация данных пользователя для регистрации из запроса.
-    //В случае невалидности хотя бы одного параметра создается массив("errors") json-объектов каждый из которых
-    //  представляет параметр запроса не прошедший валидацию.
-    //  Объекты имеют поля "param"-имя параметра(login,email..) и "message"-месседж об ошибке.
-    //Метод возвращет JSONObject с полями
-    //   "success":false,
-    //   "valid" : false,
-    //   "errors": ...
-    // Если все параметры валидны - метод возвращет "null"
+
+       /**
+     * Валидирует параметры пользователя, используя Bean Validation API.
+     * В случае обнаружения ошибок валидации, создает и возвращает JSON объект с деталями ошибок.
+     *
+     * @param model Модель пользователя, содержащая данные для валидации
+        * @see UserModel
+     * @return JSONObject с результатами валидации или null, если ошибок нет.
+     */
     JSONObject validateParams(UserModel model) {
+        logger.debug("@SignupFilter.doFilter()>> validateParams()");
         Set<ConstraintViolation<UserModel>> violations = validator.validate(model);
 
         JSONObject validationError = null;
@@ -132,7 +154,7 @@ public class SignUpFilter implements Filter {
             JSONArray errors = new JSONArray();
 
             for (ConstraintViolation<UserModel> violation : violations) {
-                log.debug("VALIDATOR: NOT VALID VALUE:   " + violation.getMessage() + "\n");
+                log.debug("   --validator: invalid value:   " + violation.getMessage() + "\n");
 
                 JSONObject error = new JSONObject();
                 error.put("parameter", violation.getPropertyPath().toString());

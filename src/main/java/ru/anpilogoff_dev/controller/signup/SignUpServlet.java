@@ -16,12 +16,18 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
 
+/**
+ * Сервлет, обрабатывающий запросы регистрации пользователя.
+ * Поддерживает операции регистрации и подтверждения регистрации через email.
+ */
 public class SignUpServlet extends HttpServlet {
     private static final Logger log = LogManager.getLogger("HttpRequestLogger");
-    private static final Logger logger = LogManager.getLogger(SignUpServlet.class);
     private SignUpService signupService;
     private EmailService emailService;
 
+    /**
+     * Инициализирует сервлет, получая ссылки на сервисы регистрации и отправки email из контекста сервлета.
+     */
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
@@ -29,6 +35,14 @@ public class SignUpServlet extends HttpServlet {
         this.signupService = (SignUpService) config.getServletContext().getAttribute("userDataService");
     }
 
+    /**
+     * Обрабатывает GET-запросы, предназначенные для подтверждения регистрации пользователя.
+     * Если параметр подтверждения присутствует в запросе, пытается подтвердить регистрацию.
+     * В случае успеха перенаправляет на главную страницу.
+     *
+     * @param req  HTTP-запрос
+     * @param resp HTTP-ответа
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (req.getQueryString() != null && req.getQueryString().contains("confirmation")) {
@@ -42,9 +56,19 @@ public class SignUpServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Обрабатывает POST-запросы, предназначенные для регистрации нового пользователя.
+     * Извлекает данные пользователя из запроса и регистрирует его в системе c помощью сервиса регистрации.
+     * Отправляет email с кодом подтверждения, если регистрация прошла успешно. Используя для этого EmailService.
+     *
+     * @param req  HTTP-запрос
+     * @param resp HTTP-ответ
+     * @see SignUpService
+     * @see EmailService
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        log.info(":POST:SignupServlet: " + req.getRequestURI()+  "    " );
+        log.info("SignupServlet: " + req.getRequestURI()+  "    " );
 
         Writer writer = resp.getWriter();
 

@@ -13,10 +13,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Сервис для отправки электронных писем
+ */
 public class EmailService {
     private static final Logger log = LogManager.getLogger("RuntimeLogger");
     private final Properties mailProperties;
 
+    /**
+     * Конструктор внутри которого происходит создание потока ввода для чтения файла "mail.properties", находящегося
+     * в classpath приложения
+     */
     public EmailService() {
         try(InputStream input = EmailService.class.getClassLoader().getResourceAsStream("mail.properties")){
             this.mailProperties = new Properties();
@@ -31,6 +38,12 @@ public class EmailService {
         }
     }
 
+    /**
+     * Отправляет  e-mail, содержащий url для подтверждения регистрации
+     *
+     * @param email адрес электронной почты зарегистрировавшегося пользователя.
+     * @param confirmCode Код подтверждения, сгенерированный в процессе регистрации.
+     */
     public void sendConfirmationEmail(String email, String confirmCode) {
         Session session = Session.getInstance(mailProperties);
         Message message = new MimeMessage(session);
