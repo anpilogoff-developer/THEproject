@@ -2,7 +2,6 @@ package ru.anpilogoff_dev.controller.signup;
 
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import jakarta.validation.constraints.AssertFalse;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,12 +9,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.anpilogoff_dev.database.model.ConfirmStatus;
+import ru.anpilogoff_dev.database.model.RegistrationStatus;
 import ru.anpilogoff_dev.database.model.UserDataObject;
 import ru.anpilogoff_dev.database.model.UserModel;
 import ru.anpilogoff_dev.service.SignUpService;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +25,6 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,21 +45,20 @@ class SignUpFilterTest {
     SignUpService service;
 
     @Mock
-    ValidatorFactory factory;
-
-    @Mock
-    Validator validator;
-
-    @Mock
     PrintWriter writer;
 
     @Mock
     ServletContext servletContext;
 
-
+    @Mock
+    RequestDispatcher dispatcher;
 
     @Mock
-    FilterConfig config;
+    ValidatorFactory factory;
+
+    @Mock
+    Validator validator;
+
 
     @Test
     void testRedirect_withNonNullSessionAndAuthorization() throws ServletException, IOException {
@@ -76,12 +73,36 @@ class SignUpFilterTest {
     }
 
     @Test
-    void checkIsDoFilterCallsOnGetRequest() throws ServletException, IOException {
+    void checkIsDoFilterCallsOnGetRequestWithoutParams() throws ServletException, IOException {
         when(request.getMethod()).thenReturn("GET");
+        when(request.getQueryString()).thenReturn("/signup");
 
-        filter.doFilter(request,response,chain);
+        filter.doFilter(request, response, chain);
 
-        verify(chain,times(1)).doFilter(request,response);
+        verify(chain, times(1)).doFilter(request, response);
+    }
+
+    @Test
+    void checkDoFilterOnGetRequestWithNonEmptyParam() throws ServletException, IOException {
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getQueryString()).thenReturn("/signup?confirmation=confirmCodePlaceholder");
+        when(request.getParameter("confirmation")).thenReturn("anyString()");
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain, times(1)).doFilter(request, response);
+    }
+
+    @Test
+    void checkForwardingOnGetRequestWithEmptyParam() throws ServletException, IOException {
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getQueryString()).thenReturn("/signup?confirmation");
+        when(request.getParameter("confirmation")).thenReturn(null);
+        when(request.getRequestDispatcher("signup.html")).thenReturn(dispatcher);
+
+        filter.doFilter(request, response, chain);
+
+        verify(dispatcher, times(1)).forward(request, response);
     }
 
     @Test
@@ -96,18 +117,18 @@ class SignUpFilterTest {
 
         when(request.getParameterNames()).thenReturn(parameterNames);
         when(request.getParameter("login")).thenReturn("validLogin7");
-        when(request.getParameter("password")).thenReturn("ValidPass123");
+        when(request.getParameter("password")).thenReturn("ValidPass123_");
         when(request.getParameter("email")).thenReturn("validEmail@test.com");
         when(request.getParameter("nickname")).thenReturn("validNickname");
 
         UserDataObject object = mock(UserDataObject.class);
 
         when(service.checkIsUserExist(any(UserModel.class))).thenReturn(object);
-        when(object.getRegistrationStatus()).thenReturn(ConfirmStatus.CONFIRMED_LOGIN);
+        when(object.getRegistrationStatus()).thenReturn(RegistrationStatus.LOGIN_EXISTS);
 
         filter.doFilter(request, response, chain);
 
-        verify(writer).write(contains("reason\":\"login"));
+        verify(writer).write(("{\"valid\":true,\"reason\":\"user with same login already exists\",\"success\":false}"));
         verify(writer).flush();
     }
 
@@ -134,7 +155,8 @@ class SignUpFilterTest {
 
     @Test
     void checkValidatorReturnNullOnValidationPass() {
-        UserModel model = new UserModel("validLogin7","ValidPass123","validEmail@test.com","validNickname");
+
+        UserModel model = new UserModel("validLogin7", "ValidPass123_", "validEmail@test.com", "validNickname");
         JSONObject res = filter.validateParams(model);
 
         Assertions.assertNull(res);

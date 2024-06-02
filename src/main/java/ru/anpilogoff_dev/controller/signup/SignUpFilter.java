@@ -1,20 +1,15 @@
 package ru.anpilogoff_dev.controller.signup;
 
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.validator.HibernateValidator;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import ru.anpilogoff_dev.database.model.UserDataObject;
 import ru.anpilogoff_dev.database.model.UserModel;
-import ru.anpilogoff_dev.listeners.SCListener;
 import ru.anpilogoff_dev.service.SignUpService;
-import ru.anpilogoff_dev.service.SignUpServiceImpl;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,26 +21,35 @@ import java.util.List;
 import java.util.Set;
 
 public class SignUpFilter implements Filter {
-    private static final Logger log = LogManager.getLogger("HttpRequestLogger");
-
+    private static final Logger log = LogManager.getLogger("RuntimeLogger");
+    private static final Logger logger = LogManager.getLogger(SignUpFilter.class);
     private Validator validator;
+
     @Override
     public void init(FilterConfig filterConfig) {
-       ValidatorFactory factory = (ValidatorFactory) filterConfig.getServletContext().getAttribute("factory");
-       validator = factory.getValidator();
+        ValidatorFactory factory = (ValidatorFactory) filterConfig.getServletContext().getAttribute("factory");
+        this.validator = factory.getValidator();
     }
-
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
         HttpServletResponse resp = (HttpServletResponse) servletResponse;
+        String method = req.getMethod();
 
         if (req.getSession(false) != null && req.getHeader("Authorization") != null) {
             resp.sendRedirect(req.getServletContext().getContextPath() + "/home");
-        }else if(req.getMethod().equals("GET")){
-            filterChain.doFilter(req,resp);
-        }else if (req.getMethod().equals("POST")) {
+        } else if (method.equals("GET")) {
+            String requestParamsString = req.getQueryString();
+            if (requestParamsString != null && requestParamsString.contains("confirmation")) {
+                String param = req.getParameter("confirmation");
+                if (param == null || param.isEmpty()) {
+                    req.getRequestDispatcher("signup.html").forward(req, resp);
+                    return;
+                }
+            }
+            filterChain.doFilter(req, resp);
+        } else if (method.equals("POST")) {
             Writer writer = resp.getWriter();
 
             resp.setCharacterEncoding("UTF-8");
@@ -66,51 +70,51 @@ public class SignUpFilter implements Filter {
 
             if (allParamsNotEmpty) {
                 UserModel model = new UserModel(params.get(0), params.get(1), params.get(2), params.get(3));
-
                 //валидация параметров для регистрации
                 JSONObject paramsValidationErrors = validateParams(model);
 
-                if(paramsValidationErrors !=null) {
+                if (paramsValidationErrors != null) {
                     writer.write(paramsValidationErrors.toString());
                     writer.flush();
+                    writer.close();
                 } else {
-                    log.debug("SignupFilter: params validation passed -> Service.checkIsUserExist()");
-
                     SignUpService service = (SignUpService) req.getServletContext().getAttribute("userDataService");
                     //проверка существования пользователя
-                    UserDataObject object = service.checkIsUserExist(model);
+                    UserDataObject isExist = service.checkIsUserExist(model);
 
-                    if(object != null) {
-                        log.debug("SignupFilter: User EXISTS");
-
+                    if (isExist != null) {
                         JSONObject alreadyExistJsonResponse = new JSONObject();
-                        alreadyExistJsonResponse.put("success",false);
-                        alreadyExistJsonResponse.put("valid",true);
+                        alreadyExistJsonResponse.put("success", false);
+                        alreadyExistJsonResponse.put("valid", true);
 
-                        switch (object.getRegistrationStatus()) {
-                            case CONFIRMED_LOGIN:
-                                alreadyExistJsonResponse.put("reason","login");
+                        switch (isExist.getRegistrationStatus()) {
+                            case LOGIN_EXISTS:
+                                alreadyExistJsonResponse.put("reason", "user with same login already exists");
                                 break;
-                            case CONFIRMED_EMAIL:
-                                alreadyExistJsonResponse.put("reason","email");
+                            case EMAIL_EXISTS:
+                                alreadyExistJsonResponse.put("reason", "user with same email already exists");
                                 break;
-                            case CONFIRMED_NICKNAME:
-                                alreadyExistJsonResponse.put("reason","nickname");
+                            case NICKNAME_EXISTS:
+                                alreadyExistJsonResponse.put("reason", "user with same nickname already exists");
                                 break;
                             case UNCONFIRMED:
-                                alreadyExistJsonResponse.put("reason","unconfirmed");
+                                alreadyExistJsonResponse.put("reason", "unconfirmed");
                                 break;
+                            case CONFIRMED:
+                                alreadyExistJsonResponse.put("reason", "existed_user_data");
                         }
                         writer.write(alreadyExistJsonResponse.toString());
                         writer.flush();
-                    }else{
-                        log.debug("SignupFilter: NOT EXISTS");
+                        writer.close();
+                    } else {
+                        log.debug("SignupFilter.doFilter():  user  DOESN'T NOT EXISTS");
                         filterChain.doFilter(servletRequest, servletResponse);
                     }
                 }
             }
         }
     }
+
     //валидация данных пользователя для регистрации из запроса.
     //В случае невалидности хотя бы одного параметра создается массив("errors") json-объектов каждый из которых
     //  представляет параметр запроса не прошедший валидацию.
@@ -120,26 +124,25 @@ public class SignUpFilter implements Filter {
     //   "valid" : false,
     //   "errors": ...
     // Если все параметры валидны - метод возвращет "null"
-    JSONObject validateParams(UserModel model){
+    JSONObject validateParams(UserModel model) {
         Set<ConstraintViolation<UserModel>> violations = validator.validate(model);
 
         JSONObject validationError = null;
         if (!violations.isEmpty()) {
-           JSONArray errors = new JSONArray();
+            JSONArray errors = new JSONArray();
 
             for (ConstraintViolation<UserModel> violation : violations) {
                 log.debug("VALIDATOR: NOT VALID VALUE:   " + violation.getMessage() + "\n");
 
                 JSONObject error = new JSONObject();
-                error.put("param",violation.getPropertyPath());
-                error.put("message",violation.getMessage());
+                error.put("parameter", violation.getPropertyPath().toString());
+                error.put("message", violation.getMessage());
                 errors.put(error);
             }
-
             validationError = new JSONObject();
-            validationError.put("success",false);
-            validationError.put("valid",false);
-            validationError.put("errors",errors);
+            validationError.put("success", false);
+            validationError.put("valid", false);
+            validationError.put("errors", errors);
         }
         return validationError;
     }

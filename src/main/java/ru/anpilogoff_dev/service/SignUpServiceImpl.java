@@ -1,43 +1,40 @@
 package ru.anpilogoff_dev.service;
 
-import jakarta.validation.Valid;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import ru.anpilogoff_dev.database.dao.UserDAO;
-import ru.anpilogoff_dev.database.model.ConfirmStatus;
+import ru.anpilogoff_dev.database.dao.RegistrationDAO;
+import ru.anpilogoff_dev.database.model.RegistrationStatus;
 import ru.anpilogoff_dev.database.model.UserDataObject;
 import ru.anpilogoff_dev.database.model.UserModel;
 
-
 public class SignUpServiceImpl implements SignUpService {
-    private static final Logger log = LogManager.getLogger();
-    private final UserDAO userDAO;
+   // private static final Logger log = LogManager.getLogger("RuntimeLogger");
+    private final RegistrationDAO registrationDAO;
 
-    public SignUpServiceImpl(UserDAO userDao) {
-        this.userDAO = userDao;
+    public SignUpServiceImpl(RegistrationDAO regDAO) {
+        this.registrationDAO = regDAO;
     }
 
     @Override
-    public UserDataObject registerUser(UserDataObject object) {return userDAO.create(object);}
+    public UserDataObject registerUser(UserDataObject object) {
+        return registrationDAO.create(object);
+    }
 
-    @Override
-    public boolean confirmEmail(UserDataObject user) {return false;}
-
+    @Override   // указать про хранимую процедуру
+    public boolean confirmRegistration(String confirmCode) {
+        return registrationDAO.confirm(confirmCode);
+    }
 
     @Override
     public UserDataObject checkIsUserExist(UserModel user) {
-        log.debug("SignupService: checkIsUserExist()");
-        UserDataObject checked = userDAO.get(user,null);
+        UserDataObject checked = registrationDAO.get(user);
 
-        if( checked != null && checked.getRegistrationStatus().equals(ConfirmStatus.CONFIRMED)){
+        if (checked != null) {
             UserModel userModel = checked.getUserModel();
-
-            if(userModel.getLogin().equals(user.getLogin())){
-                checked.setRegistrationStatus(ConfirmStatus.CONFIRMED_LOGIN);
-            }else if(userModel.getEmail().equals(user.getEmail())){
-                checked.setRegistrationStatus(ConfirmStatus.CONFIRMED_EMAIL);
-            }else if(userModel.getNickname().equals(user.getNickname())){
-                checked.setRegistrationStatus(ConfirmStatus.CONFIRMED_NICKNAME);
+            if (userModel.getLogin().equals(user.getLogin())) {
+                checked.setRegistrationStatus(RegistrationStatus.LOGIN_EXISTS);
+            } else if (userModel.getEmail().equals(user.getEmail())) {
+                checked.setRegistrationStatus(RegistrationStatus.EMAIL_EXISTS);
+            } else if (userModel.getNickname().equals(user.getNickname())) {
+                checked.setRegistrationStatus(RegistrationStatus.NICKNAME_EXISTS);
             }
         }
         return checked;

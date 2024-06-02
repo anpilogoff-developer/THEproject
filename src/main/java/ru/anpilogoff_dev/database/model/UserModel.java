@@ -7,6 +7,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @EqualsAndHashCode
+@NoArgsConstructor
 @ToString
 public class UserModel {
     private long id;
@@ -19,18 +20,20 @@ public class UserModel {
             message = "Invalid password value, must be at least 8 characters long," +
                     "contain at least one capital letter and one number.")
     private String password;
-    private String nickname;
 
-   @Pattern(regexp = "^[a-zA-Z0-9]{1,10}@[a-zA-Z0-9]{1,5}\\.[a-zA-Z0-9]{1,5}$",message = "Invalid email value")
+    @Pattern(regexp = "^[a-zA-Z0-9]{1,20}@[a-zA-Z0-9]{1,15}\\.[a-zA-Z0-9]{1,10}$", message = "Invalid email value")
     private String email;
 
-    private String registrationDate;
-    public UserModel(String login, String password, String email,String nickname) {
+    private String nickname;
+
+    private String registrationDate; //пока не решил нужно ли.....
+
+
+    public UserModel(String login, String password, String email, String nickname) {
         this.login = login;
         this.password = password;
         this.email = email;
         this.nickname = nickname;
-
     }
 
     public UserModel(String login) {
