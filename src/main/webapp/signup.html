@@ -81,7 +81,6 @@
 
     function validateEmail(event) {
         const input = event.target;
-
         const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;  // ..для валидации почты
 
         if (regex.test(input.value)) {setValid(input);}

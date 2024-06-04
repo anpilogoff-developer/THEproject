@@ -12,7 +12,6 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: THEproject_ENV
     steps:
       - uses: actions/checkout@v1
 
