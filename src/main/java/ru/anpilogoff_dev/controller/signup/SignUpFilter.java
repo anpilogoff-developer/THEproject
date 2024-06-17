@@ -10,6 +10,8 @@ import org.json.JSONObject;
 import ru.anpilogoff_dev.database.model.UserDataObject;
 import ru.anpilogoff_dev.database.model.UserModel;
 import ru.anpilogoff_dev.service.SignUpService;
+import ru.anpilogoff_dev.utils.ValidationUtil;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -92,7 +94,7 @@ public class SignUpFilter implements Filter {
             if (allParamsNotEmpty) {
                 UserModel model = new UserModel(params.get(0), params.get(1), params.get(2), params.get(3));
                 //валидация параметров для регистрации
-                JSONObject paramsValidationErrors = validateParams(model);
+                JSONObject paramsValidationErrors = ValidationUtil.validateParams(model,validator);
 
                 if (paramsValidationErrors != null) {
                     writer.write(paramsValidationErrors.toString());
@@ -134,39 +136,6 @@ public class SignUpFilter implements Filter {
                 }
             }
         }
-    }
-
-
-       /**
-     * Валидирует параметры пользователя, используя Bean Validation API.
-     * В случае обнаружения ошибок валидации, создает и возвращает JSON объект с деталями ошибок.
-     *
-     * @param model Модель пользователя, содержащая данные для валидации
-        * @see UserModel
-     * @return JSONObject с результатами валидации или null, если ошибок нет.
-     */
-    JSONObject validateParams(UserModel model) {
-        logger.debug("@SignupFilter.doFilter()>> validateParams()");
-        Set<ConstraintViolation<UserModel>> violations = validator.validate(model);
-
-        JSONObject validationError = null;
-        if (!violations.isEmpty()) {
-            JSONArray errors = new JSONArray();
-
-            for (ConstraintViolation<UserModel> violation : violations) {
-                log.debug("   --validator: invalid value:   " + violation.getMessage() + "\n");
-
-                JSONObject error = new JSONObject();
-                error.put("parameter", violation.getPropertyPath().toString());
-                error.put("message", violation.getMessage());
-                errors.put(error);
-            }
-            validationError = new JSONObject();
-            validationError.put("success", false);
-            validationError.put("valid", false);
-            validationError.put("errors", errors);
-        }
-        return validationError;
     }
 }
 

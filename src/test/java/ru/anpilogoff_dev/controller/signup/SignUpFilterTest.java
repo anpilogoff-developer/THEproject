@@ -13,6 +13,8 @@ import ru.anpilogoff_dev.database.model.RegistrationStatus;
 import ru.anpilogoff_dev.database.model.UserDataObject;
 import ru.anpilogoff_dev.database.model.UserModel;
 import ru.anpilogoff_dev.service.SignUpService;
+import ru.anpilogoff_dev.utils.ValidationUtil;
+
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -157,7 +159,7 @@ class SignUpFilterTest {
     void checkValidatorReturnNullOnValidationPass() {
 
         UserModel model = new UserModel("validLogin7", "ValidPass123_", "validEmail@test.com", "validNickname");
-        JSONObject res = filter.validateParams(model);
+        JSONObject res = ValidationUtil.validateParams(model,validator);
 
         Assertions.assertNull(res);
     }
