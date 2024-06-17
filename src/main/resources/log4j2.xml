@@ -18,6 +18,9 @@
         <File name="RuntimeLog" fileName="/opt/tomcat/logs/runtime-log.log">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
         </File>
+        <File name="DebugLog" fileName="/opt/tomcat/logs/debug.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{1} - %msg%n"/>
+        </File>
     </Appenders>
     <Loggers>
 
@@ -26,18 +29,34 @@
             <AppenderRef ref="HttpRequestLog"/>
             <AppenderRef ref="Console"/>
         </Logger>
+
         <Logger name="DatabaseLogger" level="all" additivity="false">
             <AppenderRef ref="RuntimeLog"/>
             <AppenderRef ref="DatabaseLog"/>
             <AppenderRef ref="Console"/>
         </Logger>
+
         <Logger name="DatabaseErrorLogger" level="error" additivity="false">
             <AppenderRef ref="RuntimeLog"/>
             <AppenderRef ref="DatabaseLog"/>
             <AppenderRef ref="DatabaseErrorLog"/>
             <AppenderRef ref="Console"/>
-
         </Logger>
+
+
+        <Logger name="RuntimeLogger" level="debug" additivity="false">
+            <AppenderRef ref="RuntimeLog"/>
+            <AppenderRef ref="DatabaseLog"/>
+            <AppenderRef ref="DatabaseErrorLog"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="DebugLogger"  level="debug" additivity="false">
+            <AppenderRef ref="DebugLog"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+
         <Root level="info">
             <AppenderRef ref="Console"/>
         </Root>

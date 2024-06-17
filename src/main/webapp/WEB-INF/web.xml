@@ -3,17 +3,39 @@
         "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
+
     <display-name>Archetype Created Web Application</display-name>
+
+    <filter>
+        <filter-name>session</filter-name>
+        <filter-class>ru.anpilogoff_dev.controller.auth.SessionFilter</filter-class>
+    </filter>
 
     <filter>
         <filter-name>signup</filter-name>
         <filter-class>ru.anpilogoff_dev.controller.signup.SignUpFilter</filter-class>
     </filter>
 
+    <filter>
+        <filter-name>auth</filter-name>
+        <filter-class>ru.anpilogoff_dev.controller.auth.AuthFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>session</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>auth</filter-name>
+        <url-pattern>/auth</url-pattern>
+    </filter-mapping>
+
     <filter-mapping>
         <filter-name>signup</filter-name>
         <url-pattern>/signup</url-pattern>
     </filter-mapping>
+
 
     <servlet>
         <servlet-name>signup</servlet-name>
@@ -21,15 +43,30 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>auth</servlet-name>
+        <servlet-class>ru.anpilogoff_dev.controller.auth.AuthServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>home</servlet-name>
+        <servlet-class>ru.anpilogoff_dev.controller.auth.HomeServlet</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>signup</servlet-name>
         <url-pattern>/signup</url-pattern>
     </servlet-mapping>
 
-
-
-
-
-
+    <servlet-mapping>
+        <servlet-name>auth</servlet-name>
+        <url-pattern>/auth</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>home</servlet-name>
+        <url-pattern>/home</url-pattern>
+    </servlet-mapping>
 
 </web-app>
