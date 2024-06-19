@@ -54,11 +54,11 @@ public class SessionFilter implements Filter {
             } else if (uri.contains("signup")) {
                 log.debug("   -- redirected from session filter on /home \n");
                 response.sendRedirect("/home");
-
                 return;
             }
         }else if (uri.contains("home")){
             response.sendRedirect("/auth");
+            return;
         }
         filterChain.doFilter(request, response);
     }
