@@ -21,6 +21,7 @@ public class SessionFilter implements Filter {
         HttpSession session = request.getSession(false);
         String uri = request.getRequestURI();
 
+
         log.debug("SESSION FILTER:        ");
         log.debug("  + -- requestURI:  "+request.getRequestURI());
 
